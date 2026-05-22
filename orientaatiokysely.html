@@ -1,1 +1,665 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taiteenala ja tekijätyyppi -kysely · Taiteen tuotanto</title>
+<style>
+  :root {
+    --primary: #2E5C8A;
+    --primary-dark: #1F3F5F;
+    --primary-light: #E8EEF7;
+    --accent: #C97C5D;
+    --bg: #FBFAF7;
+    --text: #1B1B1B;
+    --text-muted: #555;
+    --border: #D8D8D8;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --radius: 6px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+  }
+  .container { max-width: 760px; margin: 0 auto; padding: 32px 24px 64px; }
+  header { border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 32px; }
+  header h1 { font-size: 1.8rem; margin: 0 0 4px; color: var(--primary-dark); }
+  header .subtitle { color: var(--text-muted); font-size: 0.95rem; margin: 0; }
+  .intro { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 16px 20px; border-radius: var(--radius); margin-bottom: 32px; }
+  .intro p { margin: 0 0 8px; }
+  .intro p:last-child { margin-bottom: 0; }
+  .intro strong { color: var(--primary-dark); }
+  .question { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 16px; box-shadow: var(--shadow); }
+  .question[hidden] { display: none; }
+  .question h3 { font-size: 1.2rem; margin: 0 0 24px; color: var(--primary-dark); line-height: 1.4; }
+  .question .qnum { color: var(--accent); font-weight: 700; margin-right: 6px; }
+  .options { list-style: none; padding: 0; margin: 0; }
+  .options li { margin: 0 0 8px; }
+  .options label { display: flex; align-items: flex-start; gap: 12px; padding: 10px 12px; border-radius: var(--radius); cursor: pointer; transition: background 0.15s; border: 1px solid transparent; }
+  .options label:hover { background: var(--primary-light); }
+  .options input:focus + .opt-text { outline: 2px solid var(--primary); outline-offset: 2px; border-radius: 3px; }
+  .options input[type="radio"] { flex-shrink: 0; margin-top: 5px; accent-color: var(--primary); width: 18px; height: 18px; }
+  .options input[type="radio"]:checked + .opt-text { color: var(--primary-dark); font-weight: 500; }
+  .options label:has(input:checked) { background: var(--primary-light); border-color: var(--primary); }
+  .opt-text { flex: 1; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 24px; }
+  button { font-family: inherit; font-size: 1rem; padding: 12px 24px; border-radius: var(--radius); border: none; cursor: pointer; font-weight: 500; transition: background 0.15s, transform 0.05s; }
+  button:active { transform: translateY(1px); }
+  button.primary { background: var(--primary); color: white; }
+  button.primary:hover { background: var(--primary-dark); }
+  button.secondary { background: white; color: var(--primary); border: 1px solid var(--primary); }
+  button.secondary:hover { background: var(--primary-light); }
+  button:disabled { background: #CCC; color: #888; cursor: not-allowed; }
+  button.primary:disabled:hover { background: #CCC; }
+  .nav-actions { display: flex; gap: 12px; justify-content: space-between; margin-top: 28px; }
+  .nav-actions .secondary { margin-right: auto; }
+  .progress-bar { position: sticky; top: 0; background: var(--bg); padding: 12px 0; margin: -32px 0 24px; z-index: 10; }
+  .progress-track { background: var(--border); height: 6px; border-radius: 3px; overflow: hidden; }
+  .progress-fill { background: var(--primary); height: 100%; transition: width 0.3s; width: 0; }
+  .progress-text { font-size: 0.85rem; color: var(--text-muted); margin-top: 6px; }
+  .error-msg { background: #FDF1ED; border: 1px solid var(--accent); color: var(--accent); padding: 12px 16px; border-radius: var(--radius); margin: 16px 0; font-size: 0.95rem; }
+  /* Results */
+  .result-section { background: white; border: 1px solid var(--border); border-radius: var(--radius); padding: 28px 32px; margin-bottom: 20px; box-shadow: var(--shadow); }
+  .result-section h2 { margin-top: 0; color: var(--primary-dark); }
+  .result-headline { font-size: 1.5rem; color: var(--primary-dark); margin: 4px 0 14px; font-weight: 700; line-height: 1.35; }
+  .result-headline .name { color: var(--primary); }
+  .result-meta { color: var(--text-muted); font-size: 0.9rem; margin: 0 0 4px; }
+  .result-points { color: var(--text-muted); font-size: 0.95rem; margin: 0 0 16px; }
+  .result-subhead { font-size: 1.05rem; color: var(--primary-dark); margin: 24px 0 10px; padding-top: 16px; border-top: 1px solid var(--border); font-weight: 600; }
+  .result-subhead:first-of-type { padding-top: 0; border-top: none; }
+  .result-description p { margin: 0 0 12px; }
+  .result-description p:last-child { margin-bottom: 0; }
+  .bar-chart { display: flex; flex-direction: column; gap: 6px; margin: 16px 0; }
+  .bar-row { display: grid; grid-template-columns: 180px 1fr 50px; align-items: center; gap: 8px; font-size: 0.9rem; }
+  .bar-row .bar-label { color: var(--text-muted); text-align: right; }
+  .bar-row .bar-track { background: var(--border); height: 14px; border-radius: 7px; overflow: hidden; }
+  .bar-row .bar-fill { background: var(--primary); height: 100%; transition: width 0.5s ease; }
+  .bar-row.top .bar-label { color: var(--primary-dark); font-weight: 600; }
+  .bar-row.top .bar-fill { background: var(--accent); }
+  .bar-row .bar-value { color: var(--text-muted); font-size: 0.85rem; }
+  .copy-notice { background: #E8F5E8; border: 1px solid #5BAA5B; color: #2D6A2D; padding: 10px 14px; border-radius: var(--radius); margin: 16px 0; display: none; }
+  .copy-notice.show { display: block; }
+  details { margin-top: 12px; }
+  summary { cursor: pointer; color: var(--text-muted); font-size: 0.9rem; padding: 6px 0; }
+  summary:hover { color: var(--primary); }
+  .save-section { margin-top: 32px; padding: 20px 24px; background: white; border: 1px dashed var(--border); border-radius: var(--radius); }
+  .save-section-title { margin: 0 0 8px; font-size: 1rem; color: var(--text-muted); font-weight: 600; }
+  .privacy-note { font-size: 0.9rem; color: var(--text-muted); margin: 0 0 16px; line-height: 1.5; }
+  .save-status { margin: 12px 0 0; font-size: 0.95rem; min-height: 1.4em; }
+  .save-status.success { color: #2D6A2D; font-weight: 500; }
+  .save-status.error { color: var(--accent); }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 0.85rem; color: var(--text-muted); text-align: center; }
+  @media (max-width: 600px) {
+    .container { padding: 20px 16px 48px; }
+    header h1 { font-size: 1.4rem; }
+    .question { padding: 16px 18px; }
+    .options label { padding: 10px; }
+    .bar-row { grid-template-columns: 130px 1fr 40px; font-size: 0.8rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <h1>Taiteenala ja tekijätyyppi -kysely</h1>
+    <p class="subtitle">Tehtävä T1 · Opintojakso Taiteen tuotanto (5 op)</p>
+  </header>
+
+  <section id="intro-section">
+    <div class="intro">
+      <p><strong>Tervetuloa orientaatiokyselyyn.</strong> Vastaa 16 kysymykseen omilta tuntumiltasi — ei ole oikeita tai vääriä vastauksia.</p>
+      <p>Näet <strong>yhden kysymyksen kerrallaan</strong> ja voit halutessasi palata edelliseen muuttamaan vastausta. Kyselyn lopussa saat tuloksen, jossa kerrotaan lähin taiteenalasi ja tekijätyyppisi. Voit kopioida tuloksen yhdellä klikkauksella reflektioteh­tävän pohjaksi.</p>
+      <p>Kestoarvio: noin 5–8 minuuttia.</p>
+    </div>
+    <div class="actions">
+      <button class="primary" id="start-btn" type="button">Aloita kysely</button>
+    </div>
+  </section>
+
+  <section id="quiz-section" hidden>
+    <div class="progress-bar">
+      <div class="progress-track"><div class="progress-fill" id="progress-fill"></div></div>
+      <div class="progress-text" id="progress-text" aria-live="polite">Kysymys 1 / 16</div>
+    </div>
+    <form id="quiz-form" novalidate onsubmit="return false;">
+      <div id="questions-container"></div>
+      <div class="nav-actions">
+        <button class="secondary" type="button" id="prev-btn">← Edellinen</button>
+        <button class="primary" type="button" id="next-btn" disabled>Seuraava →</button>
+      </div>
+    </form>
+  </section>
+
+  <section id="results-section" hidden>
+    <div class="result-section" id="combined-result">
+      <p class="result-meta" style="text-transform: uppercase; letter-spacing: 0.5px; font-size: 0.8rem;">Tuloksesi</p>
+      <p class="result-headline" id="combined-headline"></p>
+      <p class="result-meta" id="combined-meta"></p>
+
+      <h3 class="result-subhead">Taiteenala-profiili</h3>
+      <div class="result-description" id="art-description"></div>
+
+      <h3 class="result-subhead">Tekijätyyppi</h3>
+      <div class="result-description" id="type-description"></div>
+
+      <details>
+        <summary>Näytä kaikki taiteenalat pisteittäin</summary>
+        <div class="bar-chart" id="art-chart"></div>
+      </details>
+      <details>
+        <summary>Näytä kaikki tekijätyypit pisteittäin</summary>
+        <div class="bar-chart" id="type-chart"></div>
+      </details>
+    </div>
+
+    <div class="copy-notice" id="copy-notice" role="status" aria-live="polite">Tulos kopioitu leikepöydälle. Voit nyt liittää sen reflektioteh­tävään.</div>
+
+    <div class="actions">
+      <button class="primary" id="copy-btn" type="button">Kopioi tulos reflektioteh­tävää varten</button>
+      <button class="secondary" id="restart-btn" type="button">Tee kysely uudelleen</button>
+    </div>
+
+    <div class="save-section" id="save-section" hidden>
+      <p class="save-section-title">Halutessasi: anonyymin vastauksen jakaminen</p>
+      <p class="privacy-note">Voit auttaa opintojakson kehittämistä jakamalla anonyymin vastauksesi. Lähetyksessä ei välitetä nimeäsi, opiskelijanumeroasi tai muuta tunnistettavaa tietoa — vain kysymysvastauksesi ja laskettu tulos. Tallennus on täysin vapaaehtoista.</p>
+      <button class="secondary" id="save-btn" type="button">Tallenna anonyymi vastaus opettajalle</button>
+      <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <footer>
+    <p>Opintojakso Taiteen tuotanto · Humak · Tehtävä T1 orientaatiokysely</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+
+// ============================================================
+// KONFIGURAATIO: liitä Apps Scriptin Web App -URL alle.
+// Kun URL on tyhjä, "Tallenna anonyymi vastaus" -painike piilotetaan.
+// Setup-ohjeet: katso tiedosto google_sheets_setup.md
+// ============================================================
+const SAVE_ENDPOINT_URL = "";
+
+const ART_FORMS = [
+  "Kuvataide",
+  "Musiikki",
+  "Tanssi",
+  "Teatteri ja esittävä taide",
+  "Kirjallisuus ja sanataide",
+  "Sirkus",
+  "Elokuva ja AV",
+  "Valokuva",
+  "Käsityö ja taidemuotoilu",
+  "Media- ja pelitaide",
+  "Yhteisötaide ja performanssi"
+];
+
+const TYPES = [
+  { name: "Hartioiden mestaroitsija", subtitle: "Syvyys × pitkäjänteinen panostus" },
+  { name: "Sitkeä rakentaja", subtitle: "Leveys × pitkäjänteinen panostus" },
+  { name: "Hetkien etsijä", subtitle: "Leveys × hetkessä eläminen" },
+  { name: "Polkujen kokeilija", subtitle: "Leveys × utelias monitaituruus" }
+];
+
+// 12 art form questions — points keyed by art form index (0-10)
+const ART_QUESTIONS = [
+  { text: "Saat tunnin vapaata vieraassa kaupungissa. Mihin ajaudut?", options: [
+    { text: "Pieneen kahvilaan, jossa kuulet vieraan kielen rytmiä", points: { 1:3, 4:1, 6:1 } },
+    { text: "Vintage-kirpputorille kaivamaan esineitä, joilla on tarina", points: { 0:2, 7:2, 8:3, 4:1 } },
+    { text: "Puistoon katsomaan ihmisiä ja koreografioimaan mielessäsi", points: { 2:3, 3:2, 5:1, 7:1 } },
+    { text: "Pieneen tilaan, jonka ovesta ei näe etukäteen mitä sisällä on", points: { 10:3, 9:2, 0:1 } }
+  ]},
+  { text: "Mikä kuvaa parhaiten unelmiesi keskeneräistä työpäivää?", options: [
+    { text: "Lattialla makaa kymmeniä paperilappuja, joista yrität löytää järjestyksen", points: { 4:3, 6:2, 9:1 } },
+    { text: "Soundtrack soi ja jalka tärisee tahtiin", points: { 1:3, 2:2, 5:1 } },
+    { text: "Kuvaruutu täynnä leikattuja klippejä ja luonnoksia", points: { 6:3, 9:2, 7:3, 0:1 } },
+    { text: "Joku huutaa 'uudestaan!' ja kaikki nauravat", points: { 3:3, 5:2, 2:2, 1:1, 10:1 } }
+  ]},
+  { text: "Mikä on syvin nautinto onnistuneessa projektissa?", options: [
+    { text: "Hiljaisuus sen valmistumisen jälkeen — se jää", points: { 0:3, 4:1, 7:2, 8:3, 6:1 } },
+    { text: "Aplodit ja se sähköisyys, joka katoaa hetkessä", points: { 3:3, 5:3, 2:2, 1:2 } },
+    { text: "Että joku katsoo sitä eri tavalla kuin oletit", points: { 9:3, 10:2, 0:2, 4:1 } },
+    { text: "Tunne että tehtiin se yhdessä — kukaan ei tehnyt sitä yksin", points: { 10:3, 3:2, 5:2, 6:3 } }
+  ]},
+  { text: "Olet pitkällä junamatkalla. Miten viihdyt?", options: [
+    { text: "Kuulokkeet päässä, katselen maisemaa", points: { 1:3, 6:1, 7:1 } },
+    { text: "Kirjoitan muistiinpanoja ja lauseita, jotka tulevat mieleen", points: { 4:3, 6:2 } },
+    { text: "Kuvaan ikkunasta ohi vilahtavia yksityiskohtia", points: { 7:3, 0:2, 6:1 } },
+    { text: "Juttelen vierustoverin kanssa kunnes hän nousee pois", points: { 10:2, 3:2, 4:1 } }
+  ]},
+  { text: "Saat lahjaksi 200 € käytettäväksi nautinnonhakuiseen iltaan. Mihin?", options: [
+    { text: "Konserttiin, jonka esittäjää en tunne etukäteen", points: { 1:3, 3:1 } },
+    { text: "Hienoon ravintolaillalliseen lukukirjan kanssa", points: { 4:3 } },
+    { text: "Lippuihin teatteriin tai sirkukseen kavereiden kanssa", points: { 3:3, 5:3, 2:2 } },
+    { text: "Uuteen kameralinssiin tai laadukkaaseen vesivärisettiin", points: { 7:3, 0:3, 8:2 } }
+  ]},
+  { text: "Luova idea iskee yhtäkkiä. Mikä on yleisimmin sen olomuoto?", options: [
+    { text: "Selkeä mielikuva, jonka piirrän heti paperille", points: { 0:3, 8:3, 7:2, 6:1 } },
+    { text: "Lause tai dialogi, joka ei jätä rauhaan", points: { 4:3, 6:2, 3:2 } },
+    { text: "Liikesarja, jonka jalkani tekevät ennen kuin huomaan", points: { 2:3, 5:2, 3:1 } },
+    { text: "Konsepti, jonka pitäisi toimia interaktiivisesti", points: { 9:3, 10:2, 6:1 } }
+  ]},
+  { text: "Olet katsomassa esitystä tai näyttelyä, joka koskettaa. Mistä se yleensä johtuu?", options: [
+    { text: "Hiljaisuudesta ja siitä, mitä on jätetty pois", points: { 0:3, 7:2, 8:2, 6:1 } },
+    { text: "Tarinasta, joka jää pyörimään päässä", points: { 4:3, 6:3, 3:2, 9:1 } },
+    { text: "Kehojen liikkeestä, joka muuttaa ilmaa ympärillään", points: { 2:3, 5:2, 3:2 } },
+    { text: "Siitä että minua pyydettiin osallistumaan, ei vain katsomaan", points: { 10:3, 9:2, 3:1 } }
+  ]},
+  { text: "Kuvittele että työpäivänä joku tarkkailisi sinua. Mitä hän näkisi?", options: [
+    { text: "Yksinäistä keskittymistä, kuulokkeet päässä, tuntien hiljaisuutta", points: { 4:3, 0:2, 8:2, 7:2, 6:1, 9:1 } },
+    { text: "Jatkuvaa työryhmäpalaveria ja koordinointia", points: { 6:3, 3:3, 10:2, 5:1, 9:2 } },
+    { text: "Toistuvaa harjoittelua: sama liike, sama nuotti, sama lause", points: { 1:3, 2:3, 5:3, 3:2 } },
+    { text: "Spontaania kokeilua ilman selvää suuntaa", points: { 10:3, 9:1, 0:1, 2:1 } }
+  ]},
+  { text: "Mikä yhdistää lapsuutesi rakkaita muistoja?", options: [
+    { text: "Tunnit kahdestaan kirjojen, sarjakuvien tai päiväkirjan kanssa", points: { 4:3, 0:2 } },
+    { text: "Pihaleikit, joissa keksittiin sääntöjä lennossa", points: { 10:3, 3:2, 9:2, 5:1 } },
+    { text: "Käsillä tekeminen, askarteleminen, rakenteleminen", points: { 8:3, 0:2 } },
+    { text: "Musiikkitunnit, soittimet, laulaminen yhdessä", points: { 1:3, 2:1 } }
+  ]},
+  { text: "Sinun pitää suunnitella yllätys läheiselle. Miten lähestyt?", options: [
+    { text: "Tiukka suunnitelma, jokainen yksityiskohta etukäteen", points: { 6:3, 4:1, 8:2, 9:2, 0:1, 7:2 } },
+    { text: "Pääidea kyllä, mutta yksityiskohdat hetkessä", points: { 10:3, 2:2, 1:1 } },
+    { text: "Suunnittelet sen yhdessä jonkun toisen kanssa", points: { 3:2, 6:2, 5:2, 10:2 } },
+    { text: "Teet jotain, jossa läheisen reaktio on osa lopputulosta", points: { 10:3, 9:3, 3:1 } }
+  ]},
+  { text: "Mikä ympäristö on sinulle luovimmillaan?", options: [
+    { text: "Hiljainen huone, jossa pöydällä on yksi asia", points: { 4:2, 0:3, 8:3, 7:2 } },
+    { text: "Kahvila, jossa on muiden ihmisten ääniä ympärillä", points: { 4:2, 7:2, 6:2 } },
+    { text: "Studio tai treenisali, jossa voit liikkua vapaasti", points: { 2:3, 5:3, 3:2, 1:2 } },
+    { text: "Kollektiivinen tila, jossa kaikki tekevät omaansa ja vaihtavat ideoita", points: { 9:3, 10:3, 0:1, 8:1 } }
+  ]},
+  { text: "Mistä saat eniten energiaa luovassa työssä?", options: [
+    { text: "Siitä että sain juuri sen mitä päässäni näin", points: { 0:3, 8:3, 4:2, 7:2, 6:1 } },
+    { text: "Yllätyksestä — siitä mitä ei voinut etukäteen tietää", points: { 10:3, 1:2, 2:2, 5:1 } },
+    { text: "Reaktiosta, jonka huomaa toisten kasvoilta", points: { 3:3, 5:3, 10:2, 1:2, 2:1 } },
+    { text: "Siitä että jälki säilyy ja löytää uudet katsojansa", points: { 7:3, 4:2, 6:3, 0:2, 8:2, 9:2 } }
+  ]}
+];
+
+// 4 type questions — points keyed by type index (0-3)
+const TYPE_QUESTIONS = [
+  { text: "Olet löytänyt itsellesi sopivan taiteen tekemisen tavan. Mikä motivoi sinua jatkamaan vuosia eteenpäin?", options: [
+    { text: "Halu päästä yhä syvemmälle yhteen asiaan", points: { 0:3 } },
+    { text: "Jokainen projekti opettaa jotain uutta — seuraava on aina hieman erilainen", points: { 1:3 } },
+    { text: "Yhteiset hetket muiden kanssa, joita tekeminen mahdollistaa", points: { 2:3 } },
+    { text: "Useat rinnakkaiset projektit ja kokeilut", points: { 3:3 } }
+  ]},
+  { text: "Joku sanoo: 'Hio yhtä taitoa kymmenen tuhatta tuntia.' Mitä ajattelet?", options: [
+    { text: "Kuulostaa juuri minun jutultani", points: { 0:3 } },
+    { text: "Voin tehdä sen, kunhan saan välillä pieniä sivuretkiä", points: { 1:3, 0:1 } },
+    { text: "Hyytävää. Mieluummin nautin tekemisestä ja jaan sen muiden kanssa", points: { 2:3 } },
+    { text: "En kyllä — keksisin sillä välin kymmenen muuta kiinnostavaa asiaa", points: { 3:3 } }
+  ]},
+  { text: "Työstät jotain, mitä et osaa vielä hyvin. Mikä pitää sinut menossa?", options: [
+    { text: "Pieni mutta tasainen edistyminen, jonka näkee taaksepäin katsoen", points: { 0:3, 1:1 } },
+    { text: "Hetket, joissa onnistuu yhtäkkiä jokin, vaikka virheitä on enemmän", points: { 3:3, 2:1 } },
+    { text: "Ympärillä olevat ihmiset, jotka tekevät samaa", points: { 2:3 } },
+    { text: "Sen huomaaminen, että työ paranee, vaikken yritäkään olla täydellinen", points: { 1:3 } }
+  ]},
+  { text: "Saat vuoden sapattivapaata. Miten käytät sen?", options: [
+    { text: "Käytän koko vuoden yhden asian todelliseen syventämiseen", points: { 0:3 } },
+    { text: "Yksi pääprojekti ja muutama sivutie, joista en vielä tiedä", points: { 1:3 } },
+    { text: "Matkustelen, tapaan ihmisiä, teen sitä mikä juuri sillä hetkellä tuntuu oikealta", points: { 2:3 } },
+    { text: "Listaan kaikki asiat, joita haluan kokeilla, ja menen läpi niin monta kuin ehdin", points: { 3:3 } }
+  ]}
+];
+
+// Descriptions for the 11 art forms
+const ART_DESCRIPTIONS = [
+  "Sinulle maailma näkyy sommittelun, värin ja esineiden välisten suhteiden kautta. Huomaat, miten valo lankeaa seinälle, ja sen kerrostuneen tarinan, joka piiloutuu yhteen kuvaan. Kuvataide on hidasta katsomista — ja olet luonnostaan hyvä siinä.\n\nSinulla on todennäköisesti taito antaa asioille tilaa kypsyä ja sanoittaa abstraktia kuvallista ajatusta tavalla, joka koskettaa muita. Pidät yksityiskohdista ja siitä hetkestä, jossa pala loksahtaa paikalleen. Pitkäjänteinen, keskittynyt työskentely on sinulle usein luontevampaa kuin nopeat käännökset.\n\nKuvallisen ajattelun ja katsomisen taitoa tarvitaan monissa paikoissa: visuaalisen identiteetin rakentaminen sotealalla, julkiset taideprojektit kaupunkiympäristössä, kuvalliset konseptit pelialalla.",
+  "Sinun maailmassasi rytmi ja ääni eivät ole tausta — ne ovat ydintä. Kuulet, kuinka sointivärit muuttavat tilan tunnelmaa ja kuinka tahti rakentaa kohtauksen jännitteen. Musiikki on aikataidetta: se elää hetkessä ja jättää silti pysyvän vaikutuksen kehoon.\n\nSinulla on usein hyvä korva ihmisten tunnetiloille ja taito luoda tunnelmaa, joka kantaa läpi illan. Ymmärrät, että toistuva harjoittelu on hidasta mutta tarpeellista, ja yhteistyö muiden kanssa on sinulle luontevaa silloin, kun osaat antaa kullekin tilaa. Aika ja ajoitus ovat sinulle tärkeitä, jopa muusta arjessa.\n\nKuulonvaraista ja yhteistyökykyistä osaamista tarvitaan monilla aloilla: äänikävely matkailussa, hyvinvointia tukevat soundscapet sotealalla, pelimusiikki, urheilutapahtumien tunnelma.",
+  "Sinulle keho on ensisijainen kieli. Tunnistat tilan tunteen ennen kuin osaat sitä sanallistaa, ja jännitys tai keventyminen näkyy siinä, miten ihmiset liikkuvat ympärilläsi. Tanssi vaatii fyysistä luottamusta ja tarkkaa harjoittelua, mutta se elää aina yhdessä hetkessä — ja tämä jännite on osa sen vetovoimaa.\n\nSinulla on luontaista tuntemusta esitysrakenteista, harjoitusprosesseista ja siitä, miten keho ja katsoja kohtaavat. Tunnistat sen hetken, jossa esitys hengittää. Usein olet myös hyvä lukemaan ryhmädynamiikkaa kehojen liikkeestä, ennen kuin sanoja edes lausutaan.\n\nLiikkeen ja kehollisen ajattelun osaamista tarvitaan monissa paikoissa: liikkuvuusvalmennus urheilussa, somaattiset menetelmät sotealalla, kehollinen pedagogiikka kasvatusalalla, koreografiset elementit pelisuunnittelussa.",
+  "Sinulle teatteri on yhteen tulemisen muoto: jännite, läsnäolo, hetkellinen taikuus. Pidät rakenteista, joissa monta osaa loksahtaa kohdalleen — käsikirjoitus, harjoitukset, valot, esitysillan rytmi. Olet usein hyvä työryhmissä, koordinaation paineen alla ja siinä taidossa, jossa monta intuitiota saadaan toimimaan yhdessä.\n\nSinulla on todennäköisesti taipumus dramaturgiseen ajatteluun: miten kohtaus rakentuu, milloin yleisö hengittää, missä on kliimaks. Tämä rakenneajattelu on harvinaisen arvokasta osaamista myös teatterikentän ulkopuolella, kun pitää saada paljon liikkuvia osia toimimaan yhteen.\n\nDramaturgista ja yhteistyökeskeistä otetta tarvitaan monilla aloilla: tarinankerronta yritysviestinnässä, draamapedagogiikka kasvatusalalla, narratiiviset elementit pelialalla, kokemustuotanto matkailussa.",
+  "Sanat ovat sinun aineesi. Sinulla on tarkka korva sille, miten lause hengittää ja miten metafora kantaa enemmän kuin selittäminen. Kirjallisuus on hitaan kypsyttelyn taidetta: kuukausia muistilappuja, vuosia luonnoksia, sitten yhtäkkiä se valmis sivu.\n\nOlet luultavasti hyvä rakentamaan pitkäjänteisiä kaaria ja sietämään hitautta. Sanan tarkkuus seuraa sinua arjessa — kirjoituksissa, keskusteluissa, viestinnässä. Pidät tilanteista, joissa muotoilu, näkökulma ja kieli ratkaisevat.\n\nSanan ja narratiivin osaamista tarvitaan monilla aloilla: sisältösuunnittelu pelialalla, tarinaterapeuttiset menetelmät sotealalla, copywriting matkailubrändeille, sanataide kasvatusalalla.",
+  "Sinulle taide on kehollista riskiä ja täydellistä luottamusta. Sirkus vaatii sekä äärimmäistä tarkkuutta että lupaa epäonnistua harjoituksissa — ja olet usein viehättynyt juuri tästä jännitteestä. Rakastat lavalla syntyvää sähköisyyttä ja kollektiivisen onnistumisen tunnetta, kun kaikki osat solahtavat kohdalleen.\n\nSinulla on todennäköisesti vahva turvallisuusajattelu ja kyky koordinoida monimutkaisia teknisiä kokonaisuuksia. Olet usein hyvä luomaan ryhmädynamiikkaa, jossa erilaiset osaajat tukevat toisiaan. Riskinotto ja huolellinen valmistautuminen ovat sinulle saman kolikon kaksi puolta.\n\nKehollisuuden, riskinarvioinnin ja yhteistoiminnan yhdistelmää tarvitaan monilla aloilla: hyvinvointi- ja sosiaalisirkus sotealalla, motoriset harjoitteet kasvatusalalla, fyysinen elämystuotanto matkailussa, tapahtumien tekninen koordinointi.",
+  "Sinussa elää tarinankertoja, joka näkee asioita kohtauksina. Kuvaruutu, leikkaus, ääniraita, kuvakulma — nämä ovat sinulle työkaluja, joilla rakennetaan tunteita. Elokuva on kärsivällisyyden taidetta: kuukausia suunnittelua, viikkoja kuvauksia, kuukausia editointia.\n\nOlet usein hyvä aikataulutuksessa ja vision suhteuttamisessa käytännön rajoituksiin. Sinulla on todennäköisesti taito hahmottaa kokonaisuus pienistä osista — ominaisuus, joka palvelee monilla aloilla, joissa pitää yhdistää luovuus ja rakenne. Pidät prosesseista, joissa lopputulos paljastuu vasta vähitellen.\n\nKerronnan ja kuvallisen ajattelun osaamista tarvitaan monissa paikoissa: koulutusvideot ja pelitrailerit pelialalla, dokumentaariset menetelmät sotealalla, matkailubrändien tarinaformaatit, oppimisvideot kasvatusalalla.",
+  "Sinulla on silmä, joka osaa pysäyttää. Näet sen yhden hetken, jossa valo, ele ja koostumus sanovat enemmän kuin tuhat sanaa. Valokuva opettaa katsomaan — ja sinulle se on tullut tavaksi.\n\nSinulla on todennäköisesti hyvä tilannetaju, jolla osaat kunnioittaa kuvattavan ihmistä — taito, joka palvelee laajemminkin yhteistyössä ihmisten kanssa. Olet usein hyvä yksityiskohtien hallinnassa ja kärsivällisessä työssä, jossa lopputulos on enemmän kuin osiensa summa.\n\nVisuaalisen tarkkuuden ja ihmisten kohtaamisen yhdistelmää tarvitaan monilla aloilla: dokumentaarinen kuvaviestintä sotealalla, brändivisuaalisuus matkailussa, urheilukuvaus, visuaaliset oppimateriaalit kasvatusalalla.",
+  "Sinulle materiaali ei ole vain väline — se on keskustelukumppani. Tunnistat puun, kankaan tai saven oman luonteen ja annat sen ohjata tekemistä. Käsityö on rauhallista ja toistuvaa, ja sinä saat siitä energiaa, jota muut ehkä hakevat hektisempien tahtien puolelta.\n\nSinulla on todennäköisesti vahva yhteys laatuun ja kestävyyteen, mikä on tällä hetkellä erityisen arvostettua. Olet usein hyvä pienissä yksityiskohdissa ja kärsivällisissä prosesseissa, jotka erottavat huolellisen työn nopeasti tehdystä. Käsillä tekeminen on sinulle myös ajattelun muoto.\n\nMateriaalin ja muotoilun osaamista tarvitaan monilla aloilla: tuotemuotoilu pelialalla, terapeuttinen käsityö sotealalla, käsityöperinteet matkailussa, materiaalipohjainen pedagogiikka kasvatusalalla.",
+  "Sinussa yhdistyvät tarinankerronta, koodi ja interaktiivisuus. Pelillisyys ja vuorovaikutteinen rakenne kiinnostavat sinua enemmän kuin valmiit tarinat — haluat, että yleisö tekee jotain, ei vain katso. Media- ja pelitaide on nopean iteroinnin laji: prototyyppi, testi, korjaus, uusi prototyyppi.\n\nSinulla on todennäköisesti vahva teknologinen uteliaisuus ja kyky tehdä yhteistyötä eri ammattikuntien kanssa — taiteilijoiden, ohjelmoijien ja suunnittelijoiden välillä. Tämä monikielisyys on alalla harvinaisen arvokasta osaamista, sillä se yhdistää maailmoja, jotka muuten puhuvat eri kieliä.\n\nInteraktiivisuuden ja monitieteisen ajattelun osaamista tarvitaan monilla aloilla: pelillinen oppiminen kasvatusalalla, terapeuttiset pelit sotealalla, immersiiviset matkailukokemukset, gamifikaatio urheilussa, AR-näyttelyt kulttuurikohteissa.",
+  "Sinulle taide ei elä erillään yleisöstä — yleisö on osa teosta. Sinua kiinnostaa se hetki, jossa kollektiivinen kokemus syntyy ihmisten välille, ja olet usein utelias siitä, mitä taide voi tehdä jossakin muualla kuin galleriassa tai teatterissa. Yhteisötaide ja performanssi ovat improvisoivia, vuorovaikutteisia ja paikkasidonnaisia.\n\nSinulla on todennäköisesti vahvat fasilitointitaidot, kyky pitää tila avoinna yllätyksille ja taito kuunnella erilaisia ääniä yhtaikaa. Nämä ovat ydintaitoja silloin, kun työ tapahtuu monitoimijaisissa ja muuttuvissa ympäristöissä — ja niitä tarvitaan paljon enemmän kuin yleensä huomataan.\n\nOsallistavaa ja fasilitoivaa otetta tarvitaan monilla aloilla: yhteisöllinen taideterapia sotealalla, osallistavat menetelmät kaupunki- ja matkailukehityksessä, dialogi-menetelmät kasvatus- ja nuorisoalalla, yhteiskunnallinen vaikuttavuus."
+];
+
+const TYPE_DESCRIPTIONS = [
+  "Sinulla on harvinainen kyky pysyä yhdessä asiassa pitkään. Et pelkää toistoja, sillä tunnistat, että ne ovat osa polkua kohti syvempää osaamista. Sinussa on luonnollinen sitkeys ja kyky nähdä se kaukainen tavoite, jota kohti monet eivät jaksa kulkea.\n\nSinua motivoi kasvu, joka näkyy vasta vuosien päästä. Pidät hitaista prosesseista, joissa edistyminen on huomaamatonta päivätasolla mutta kiistatonta vuositasolla. Sinulle on ominaista syvä keskittyminen — kun innostut jostakin, et halua jakaa huomiotasi liian moneen suuntaan.\n\nVahvuutesi ympärillä: laaduntaju, kärsivällisyys, kyky pitää ote pitkissä projekteissa. Sinun kaltaisistasi ihmisistä syntyvät usein ne taiteilijat, tutkijat ja ammattilaiset, joiden työ kestää aikaa. Muista kuitenkin, että matkan varrella saa nauttia — täydellisyys ei ole ainoa onnistumisen mittari.",
+  "Sinulla on pitkäjänteisyyttä ilman pakkomielteistä täydellisyyden tavoittelua. Etenet päivä kerrallaan, hyväksyt keskeneräisyyden ja arvostat työn jälkeä enemmän kuin sen viimeistelyä. Sinussa yhdistyvät sitkeys ja joustavuus — harvinainen yhdistelmä.\n\nSinua motivoi se, mitä jokainen projekti opettaa, ja se että voit kerrostaa osaamista vähitellen. Pidät rinnakkaisista virroista — yksi pääprojekti ja muutama sivutie, joista syntyy yllättäviä yhteyksiä. Et kavahda tylsiä vaiheita, sillä tiedät että ne kuuluvat työhön, mutta annat itsellesi myös luvan kokeilla.\n\nVahvuutesi ympärillä: kestävyys, prosessitaju, kyky liikkua eteenpäin myös silloin, kun innostus hiipuu hetkeksi. Sinun kaltaiset ihmiset rakentavat hiljaa mutta varmasti — heidän työnsä kasvaa kuin vuosirengas kerrallaan, ja yhtäkkiä huomataan, että jotain merkittävää on syntynyt.",
+  "Sinulle taide ei ole saavutus, vaan kokemus. Arvostat sitä, että teet kun teet, ja autat muita kokemaan saman. Pitkät yksinäiset harjoitusrupeamat tuntuvat sinusta vierailta — yhteinen tekemisen hetki on se, mistä saat energian.\n\nSinua motivoi läsnäolo, ympärillä olevat ihmiset ja se hetkellinen yhteys, joka syntyy kun jokin asia tehdään yhdessä. Pidät tilanteista, joissa tehtävänä on enemmän olla kuin saavuttaa. Et kilpaile mestaruudesta — kilpailet siitä, että hetki tuntuu joltakin.\n\nVahvuutesi ympärillä: läsnäolokyky, sosiaalinen herkkyys, kyky tehdä asioista merkityksellisiä silloin kun ne tapahtuvat. Sinun kaltaiset ihmiset pitävät yhteisöt elossa ja saavat muut huomaamaan sen, mikä yleensä ohitetaan. Pitkä polku ei ole sinun mittarisi — eikä sen tarvitse olla.",
+  "Sinussa palaa utelias ja levoton liekki. Et halua jäädä yhteen laatikkoon, ja pidät siitä, kun voit kerrostaa osaamista monelta eri suunnalta. Yhden taidon mestariksi tuleminen ei vedä sinua — sinua vetävät rinnakkaiset projektit, uudet kokeilut ja se hetki, jossa eri alat alkavat puhua toisilleen.\n\nSinua motivoi keksiminen, vaihtelu ja oivallus. Sinulla saattaa olla useita aloitettuja juttuja samaan aikaan, ja se on sinulle ominaista — ei ongelma. Pidät tilanteista, joissa ei vielä tiedä mihin ollaan menossa, ja annat itsellesi luvan vaihtaa suuntaa.\n\nVahvuutesi ympärillä: monipuolisuus, sopeutumiskyky, taito nähdä yhteyksiä eri alojen välillä. Tämän päivän työelämässä juuri tällaisia ihmisiä tarvitaan — heidän kaltaisensa rakentavat siltoja, joista muut eivät tiedä että ne pitäisi olla olemassa."
+];
+
+// --- Quiz state and rendering ---
+let currentQuestion = 0;
+const TOTAL_QUESTIONS = ART_QUESTIONS.length + TYPE_QUESTIONS.length;
+
+function renderQuiz() {
+  const container = document.getElementById("questions-container");
+  let html = "";
+  ART_QUESTIONS.forEach((q, qi) => {
+    html += renderQuestion(qi, q, "art");
+  });
+  TYPE_QUESTIONS.forEach((q, qi) => {
+    html += renderQuestion(ART_QUESTIONS.length + qi, q, "type");
+  });
+  container.innerHTML = html;
+  attachListeners();
+  showQuestion(0);
+}
+
+function renderQuestion(globalIdx, q, kind) {
+  const qid = `q${globalIdx}`;
+  const num = globalIdx + 1;
+  let options = "";
+  q.options.forEach((opt, i) => {
+    const letter = ["A","B","C","D"][i];
+    const oid = `${qid}_${letter}`;
+    options += `
+      <li>
+        <label for="${oid}">
+          <input type="radio" name="${qid}" id="${oid}" value="${i}" data-question="${globalIdx}" data-kind="${kind}">
+          <span class="opt-text"><strong>${letter}.</strong> ${escapeHtml(opt.text)}</span>
+        </label>
+      </li>`;
+  });
+  return `
+    <fieldset class="question" id="fieldset-${qid}" data-question="${globalIdx}" hidden>
+      <legend class="visually-hidden">Kysymys ${num}</legend>
+      <h3><span class="qnum">${num}.</span>${escapeHtml(q.text)}</h3>
+      <ul class="options">${options}</ul>
+    </fieldset>`;
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+}
+
+function attachListeners() {
+  document.querySelectorAll('input[type="radio"]').forEach(input => {
+    input.addEventListener("change", onAnswerChange);
+  });
+}
+
+function onAnswerChange(e) {
+  updateNextButton();
+}
+
+function showQuestion(idx) {
+  currentQuestion = idx;
+  document.querySelectorAll(".question").forEach((q, i) => {
+    q.hidden = i !== idx;
+  });
+  document.getElementById("prev-btn").disabled = idx === 0;
+  const nextBtn = document.getElementById("next-btn");
+  nextBtn.textContent = idx === TOTAL_QUESTIONS - 1 ? "Näytä tulokset →" : "Seuraava →";
+  updateNextButton();
+  updateProgress();
+  // Focus first option for keyboard users
+  const firstOpt = document.querySelector(`#fieldset-q${idx} input[type="radio"]`);
+  if (firstOpt) {
+    setTimeout(() => firstOpt.focus({ preventScroll: true }), 0);
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function updateNextButton() {
+  const answered = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+  document.getElementById("next-btn").disabled = !answered;
+}
+
+function updateProgress() {
+  document.getElementById("progress-fill").style.width = ((currentQuestion + 1) / TOTAL_QUESTIONS * 100) + "%";
+  document.getElementById("progress-text").textContent = `Kysymys ${currentQuestion + 1} / ${TOTAL_QUESTIONS}`;
+}
+
+function goPrev() {
+  if (currentQuestion > 0) showQuestion(currentQuestion - 1);
+}
+
+function goNext() {
+  if (currentQuestion < TOTAL_QUESTIONS - 1) {
+    showQuestion(currentQuestion + 1);
+  } else {
+    showResults();
+  }
+}
+
+// --- Compute results ---
+function computeResults() {
+  const artScores = new Array(ART_FORMS.length).fill(0);
+  const typeScores = new Array(TYPES.length).fill(0);
+
+  ART_QUESTIONS.forEach((q, qi) => {
+    const checked = document.querySelector(`input[name="q${qi}"]:checked`);
+    if (!checked) return;
+    const opt = q.options[parseInt(checked.value, 10)];
+    Object.entries(opt.points).forEach(([k, v]) => {
+      artScores[parseInt(k, 10)] += v;
+    });
+  });
+
+  TYPE_QUESTIONS.forEach((q, qi) => {
+    const globalIdx = ART_QUESTIONS.length + qi;
+    const checked = document.querySelector(`input[name="q${globalIdx}"]:checked`);
+    if (!checked) return;
+    const opt = q.options[parseInt(checked.value, 10)];
+    Object.entries(opt.points).forEach(([k, v]) => {
+      typeScores[parseInt(k, 10)] += v;
+    });
+  });
+
+  return { artScores, typeScores };
+}
+
+function getRanked(scores, names) {
+  return names.map((name, i) => ({ name, score: scores[i], index: i }))
+    .sort((a, b) => b.score - a.score);
+}
+
+// --- Show results ---
+function showResults() {
+  const { artScores, typeScores } = computeResults();
+  const artRanked = getRanked(artScores, ART_FORMS);
+  const typeRanked = getRanked(typeScores, TYPES.map(t => t.name));
+
+  const topArt = artRanked[0];
+  const secondArt = artRanked[1];
+  const topType = typeRanked[0];
+
+  document.getElementById("combined-headline").innerHTML =
+    `Sinun lähin taiteenalasi on <span class="name">${escapeHtml(topArt.name)}</span><br>ja tekijätyyppisi on <span class="name">${escapeHtml(topType.name)}</span>.`;
+
+  document.getElementById("combined-meta").innerHTML =
+    `Taiteenala: ${escapeHtml(topArt.name)} (${topArt.score} p) · Toiseksi sopiva: ${escapeHtml(secondArt.name)} (${secondArt.score} p)<br>` +
+    `Tekijätyyppi: ${escapeHtml(topType.name)} — ${escapeHtml(TYPES[topType.index].subtitle)} (${topType.score} p)`;
+
+  document.getElementById("art-description").innerHTML = paragraphs(ART_DESCRIPTIONS[topArt.index]);
+  document.getElementById("type-description").innerHTML = paragraphs(TYPE_DESCRIPTIONS[topType.index]);
+
+  renderChart("art-chart", artRanked, topArt.score);
+  renderChart("type-chart", typeRanked, topType.score);
+
+  document.getElementById("quiz-section").hidden = true;
+  document.getElementById("results-section").hidden = false;
+  // Show save section only if endpoint is configured
+  if (SAVE_ENDPOINT_URL && SAVE_ENDPOINT_URL.length > 0) {
+    document.getElementById("save-section").hidden = false;
+  }
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function paragraphs(text) {
+  return text.split("\n\n").map(p => `<p>${escapeHtml(p)}</p>`).join("");
+}
+
+function renderChart(targetId, ranked, maxScore) {
+  const target = document.getElementById(targetId);
+  const maxBarValue = Math.max(maxScore, 1);
+  target.innerHTML = ranked.map((r, i) => `
+    <div class="bar-row ${i === 0 ? "top" : ""}">
+      <div class="bar-label">${escapeHtml(r.name)}</div>
+      <div class="bar-track"><div class="bar-fill" style="width: ${(r.score / maxBarValue * 100)}%"></div></div>
+      <div class="bar-value">${r.score}</div>
+    </div>
+  `).join("");
+}
+
+// --- Copy to clipboard ---
+function buildCopyText() {
+  const { artScores, typeScores } = computeResults();
+  const artRanked = getRanked(artScores, ART_FORMS);
+  const typeRanked = getRanked(typeScores, TYPES.map(t => t.name));
+  const topArt = artRanked[0];
+  const secondArt = artRanked[1];
+  const topType = typeRanked[0];
+  const date = new Date().toLocaleDateString("fi-FI");
+
+  return `TAITEENALA JA TEKIJÄTYYPPI -KYSELY — TULOKSENI
+Päivämäärä: ${date}
+
+Sinun lähin taiteenalasi on ${topArt.name.toUpperCase()} (${topArt.score} p)
+ja tekijätyyppisi on ${topType.name.toUpperCase()} (${topType.score} p).
+
+Toiseksi sopiva taiteenala: ${secondArt.name} (${secondArt.score} p)
+Tekijätyypin alaotsikko: ${TYPES[topType.index].subtitle}
+
+TAITEENALA-PROFIILI
+
+${ART_DESCRIPTIONS[topArt.index]}
+
+TEKIJÄTYYPPI
+
+${TYPE_DESCRIPTIONS[topType.index]}
+
+---
+Reflektio (kirjoita alle):
+
+`;
+}
+
+async function copyResult() {
+  const text = buildCopyText();
+  try {
+    await navigator.clipboard.writeText(text);
+    showCopyNotice();
+  } catch (err) {
+    // Fallback: select hidden textarea
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    showCopyNotice();
+  }
+}
+
+function showCopyNotice() {
+  const n = document.getElementById("copy-notice");
+  n.classList.add("show");
+  setTimeout(() => n.classList.remove("show"), 4000);
+}
+
+function onRestart() {
+  document.getElementById("quiz-form").reset();
+  document.getElementById("results-section").hidden = true;
+  document.getElementById("quiz-section").hidden = false;
+  // Reset save section
+  const ss = document.getElementById("save-section");
+  if (ss && SAVE_ENDPOINT_URL) {
+    document.getElementById("save-btn").hidden = false;
+    document.getElementById("save-status").textContent = "";
+    document.getElementById("save-status").className = "save-status";
+  }
+  showQuestion(0);
+}
+
+// --- Save anonymous result to Google Sheets via Apps Script ---
+async function saveResult() {
+  const btn = document.getElementById("save-btn");
+  const status = document.getElementById("save-status");
+  btn.disabled = true;
+  status.textContent = "Tallennetaan...";
+  status.className = "save-status";
+
+  const { artScores, typeScores } = computeResults();
+  const artRanked = getRanked(artScores, ART_FORMS);
+  const typeRanked = getRanked(typeScores, TYPES.map(t => t.name));
+  const topArt = artRanked[0];
+  const secondArt = artRanked[1];
+  const topType = typeRanked[0];
+
+  // Collect 16 answer letters
+  const answers = [];
+  for (let i = 0; i < TOTAL_QUESTIONS; i++) {
+    const checked = document.querySelector(`input[name="q${i}"]:checked`);
+    answers.push(checked ? ["A","B","C","D"][parseInt(checked.value, 10)] : "");
+  }
+
+  const payload = {
+    answers,
+    topArt: { name: topArt.name, score: topArt.score },
+    secondArt: { name: secondArt.name, score: secondArt.score },
+    topType: { name: topType.name, score: topType.score, subtitle: TYPES[topType.index].subtitle },
+    allArtScores: artScores,
+    allTypeScores: typeScores
+  };
+
+  try {
+    await fetch(SAVE_ENDPOINT_URL, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify(payload)
+    });
+    status.textContent = "Kiitos! Vastauksesi on tallennettu opettajalle anonyymisti.";
+    status.className = "save-status success";
+    btn.hidden = true;
+  } catch (err) {
+    status.textContent = "Tallennus ei onnistunut. Voit silti jatkaa tuloksen kopioimisella ja reflektioteh­tävän tekemisellä.";
+    status.className = "save-status error";
+    btn.disabled = false;
+  }
+}
+
+function onStart() {
+  document.getElementById("intro-section").hidden = true;
+  document.getElementById("quiz-section").hidden = false;
+  showQuestion(0);
+}
+
+// --- Init ---
+document.addEventListener("DOMContentLoaded", () => {
+  renderQuiz();
+  document.getElementById("start-btn").addEventListener("click", onStart);
+  document.getElementById("prev-btn").addEventListener("click", goPrev);
+  document.getElementById("next-btn").addEventListener("click", goNext);
+  document.getElementById("restart-btn").addEventListener("click", onRestart);
+  document.getElementById("copy-btn").addEventListener("click", copyResult);
+  document.getElementById("save-btn").addEventListener("click", saveResult);
+  // Allow Enter on a selected radio to advance
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Enter" && document.getElementById("quiz-section").hidden === false) {
+      const nextBtn = document.getElementById("next-btn");
+      if (!nextBtn.disabled && document.activeElement && document.activeElement.type === "radio") {
+        e.preventDefault();
+        goNext();
+      }
+    }
+  });
+});
+</script>
+</body>
+</html>
 
