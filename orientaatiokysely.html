@@ -116,9 +116,9 @@
 
   <section id="intro-section">
     <div class="intro">
-      <p><strong>Tervetuloa orientaatiokyselyyn.</strong> Vastaa 16 kysymykseen omilta tuntumiltasi — ei ole oikeita tai vääriä vastauksia.</p>
-      <p>Näet <strong>yhden kysymyksen kerrallaan</strong> ja voit halutessasi palata edelliseen muuttamaan vastausta. Kyselyn lopussa saat tuloksen, jossa kerrotaan lähin taiteenalasi ja tekijätyyppisi. Voit kopioida tuloksen yhdellä klikkauksella reflektioteh­tävän pohjaksi.</p>
-      <p>Kestoarvio: noin 5–8 minuuttia.</p>
+      <p><strong>Tervetuloa orientaatiokyselyyn.</strong> Vastaa 16 kysymykseen tunteen mukaan. Kyselyssä ei ole oikeita tai vääriä vastauksia.</p>
+      <p>Näet <strong>yhden kysymyksen kerrallaan</strong> ja voit halutessasi palata edelliseen muuttamaan vastausta. Kyselyn lopussa saat tulokset, jossa kerrotaan lähin tai sinulle ominaisin taiteenala ja tekijätyyppisi. Tämän jälkeen voit kopioida tulokset reflektioteh­tävän pohjaksi ja tallentaa ne myöhempää käyttöä sekä opintojakson kehittämistä varten.</p>
+      <p>Vastaamisen kesto on noin 5–8 minuuttia. Vastaaminen on täysin anonyymiä.</p>
     </div>
     <div class="actions">
       <button class="primary" id="start-btn" type="button">Aloita kysely</button>
@@ -161,16 +161,16 @@
       </details>
     </div>
 
-    <div class="copy-notice" id="copy-notice" role="status" aria-live="polite">Tulos kopioitu leikepöydälle. Voit nyt liittää sen reflektioteh­tävään.</div>
+    <div class="copy-notice" id="copy-notice" role="status" aria-live="polite">Tulos kopioitu leikepöydälle. Voit nyt liittää sen talteen esim. wordiin reflektioteh­tävää varten.</div>
 
     <div class="actions">
-      <button class="primary" id="copy-btn" type="button">Kopioi tulos reflektioteh­tävää varten</button>
+      <button class="primary" id="copy-btn" type="button">Kopioi tulos leikepöydälle</button>
       <button class="secondary" id="restart-btn" type="button">Tee kysely uudelleen</button>
     </div>
 
     <div class="save-section" id="save-section" hidden>
-      <p class="save-section-title">Halutessasi: anonyymin vastauksen jakaminen</p>
-      <p class="privacy-note">Voit auttaa opintojakson kehittämistä jakamalla anonyymin vastauksesi. Lähetyksessä ei välitetä nimeäsi, opiskelijanumeroasi tai muuta tunnistettavaa tietoa — vain kysymysvastauksesi ja laskettu tulos. Tallennus on täysin vapaaehtoista.</p>
+      <p class="save-section-title">Anonyymin vastauksen tallentaminen</p>
+      <p class="privacy-note">Voit auttaa opintojakson kehittämistä tallentamalla vastauksesi. Lähetyksessä ei välitetä nimeäsi, opiskelijanumeroasi tai muuta tunnistettavaa tietoa. Vain vastauksesi ja laskettu tulos tallennetaan.</p>
       <button class="secondary" id="save-btn" type="button">Tallenna anonyymi vastaus opettajalle</button>
       <p id="save-status" class="save-status" role="status" aria-live="polite"></p>
     </div>
@@ -213,103 +213,103 @@ const TYPES = [
 
 // 12 art form questions — points keyed by art form index (0-10)
 const ART_QUESTIONS = [
-  { text: "Saat tunnin vapaata vieraassa kaupungissa. Mihin ajaudut?", options: [
-    { text: "Pieneen kahvilaan, jossa kuulet vieraan kielen rytmiä", points: { 1:3, 4:1, 6:1 } },
-    { text: "Vintage-kirpputorille kaivamaan esineitä, joilla on tarina", points: { 0:2, 7:2, 8:3, 4:1 } },
-    { text: "Puistoon katsomaan ihmisiä ja koreografioimaan mielessäsi", points: { 2:3, 3:2, 5:1, 7:1 } },
-    { text: "Pieneen tilaan, jonka ovesta ei näe etukäteen mitä sisällä on", points: { 10:3, 9:2, 0:1 } }
+  { text: "Saat tunnin vapaata toisessa maassa, vieraassa kaupungissa. Mihin ajaudut?", options: [
+    { text: "Pieneen eläväiseen kahvilaan, jossa kuulet puheensorinaa", points: { 1:3, 4:1, 6:1 } },
+    { text: "Vintage-kirpputorille katsomaan mitä sieltä löytyy", points: { 0:2, 7:2, 8:3, 4:1 } },
+    { text: "Puistoon katsomaan ihmisiä ja heidän touhujaan", points: { 2:3, 3:2, 5:1, 7:1 } },
+    { text: "Pienelle kujalle, josta ei näe etukäteen mitä siellä on tai mihin se johtaa", points: { 10:3, 9:2, 0:1 } }
   ]},
   { text: "Mikä kuvaa parhaiten unelmiesi keskeneräistä työpäivää?", options: [
-    { text: "Lattialla makaa kymmeniä paperilappuja, joista yrität löytää järjestyksen", points: { 4:3, 6:2, 9:1 } },
-    { text: "Soundtrack soi ja jalka tärisee tahtiin", points: { 1:3, 2:2, 5:1 } },
+    { text: "Lattialla makaa kymmeniä postit-lappuja, joista yrität löytää järjestyksen", points: { 4:3, 6:2, 9:1 } },
+    { text: "Soundtrack soi ja jalka vipattaa tahtiin", points: { 1:3, 2:2, 5:1 } },
     { text: "Kuvaruutu täynnä leikattuja klippejä ja luonnoksia", points: { 6:3, 9:2, 7:3, 0:1 } },
     { text: "Joku huutaa 'uudestaan!' ja kaikki nauravat", points: { 3:3, 5:2, 2:2, 1:1, 10:1 } }
   ]},
   { text: "Mikä on syvin nautinto onnistuneessa projektissa?", options: [
-    { text: "Hiljaisuus sen valmistumisen jälkeen — se jää", points: { 0:3, 4:1, 7:2, 8:3, 6:1 } },
-    { text: "Aplodit ja se sähköisyys, joka katoaa hetkessä", points: { 3:3, 5:3, 2:2, 1:2 } },
-    { text: "Että joku katsoo sitä eri tavalla kuin oletit", points: { 9:3, 10:2, 0:2, 4:1 } },
-    { text: "Tunne että tehtiin se yhdessä — kukaan ei tehnyt sitä yksin", points: { 10:3, 3:2, 5:2, 6:3 } }
+    { text: "Hiljaisuus ja rauha mikä syntyy kun kaikki on ohi", points: { 0:3, 4:1, 7:2, 8:3, 6:1 } },
+    { text: "Aplodit ja sen mukanaan tuoma sähköisyys, joka tuntuu joka solussa", points: { 3:3, 5:3, 2:2, 1:2 } },
+    { text: "Että joku näkee sen eri tavalla kuin oletit tai kuvittelit", points: { 9:3, 10:2, 0:2, 4:1 } },
+    { text: "Tunne että se tehtiin yhdessä: kukaan ei olisi voinut selvitä siitä yksin", points: { 10:3, 3:2, 5:2, 6:3 } }
   ]},
   { text: "Olet pitkällä junamatkalla. Miten viihdyt?", options: [
-    { text: "Kuulokkeet päässä, katselen maisemaa", points: { 1:3, 6:1, 7:1 } },
-    { text: "Kirjoitan muistiinpanoja ja lauseita, jotka tulevat mieleen", points: { 4:3, 6:2 } },
+    { text: "Kuulokkeet päässä, omissa oloissani", points: { 1:3, 6:1, 7:1 } },
+    { text: "Kirjoitan ylös ideoita, muistiinpanoja tai lauseita, jotka tulevat mieleen", points: { 4:3, 6:2 } },
     { text: "Kuvaan ikkunasta ohi vilahtavia yksityiskohtia", points: { 7:3, 0:2, 6:1 } },
     { text: "Juttelen vierustoverin kanssa kunnes hän nousee pois", points: { 10:2, 3:2, 4:1 } }
   ]},
   { text: "Saat lahjaksi 200 € käytettäväksi nautinnonhakuiseen iltaan. Mihin?", options: [
     { text: "Konserttiin, jonka esittäjää en tunne etukäteen", points: { 1:3, 3:1 } },
-    { text: "Hienoon ravintolaillalliseen lukukirjan kanssa", points: { 4:3 } },
-    { text: "Lippuihin teatteriin tai sirkukseen kavereiden kanssa", points: { 3:3, 5:3, 2:2 } },
-    { text: "Uuteen kameralinssiin tai laadukkaaseen vesivärisettiin", points: { 7:3, 0:3, 8:2 } }
+    { text: "Hienoon ravintolaillalliseen rauhallisessa ja tutussa seurassa", points: { 4:3 } },
+    { text: "Lippuihin teatteriin, nykytanssiin tai sirkukseen kavereiden kanssa", points: { 3:3, 5:3, 2:2 } },
+    { text: "Uuteen tarvikkeeseen, jota en ole vielä hankkinut, kuten objektiiviin tai laadukkaaseen vesivärisettiin", points: { 7:3, 0:3, 8:2 } }
   ]},
   { text: "Luova idea iskee yhtäkkiä. Mikä on yleisimmin sen olomuoto?", options: [
     { text: "Selkeä mielikuva, jonka piirrän heti paperille", points: { 0:3, 8:3, 7:2, 6:1 } },
     { text: "Lause tai dialogi, joka ei jätä rauhaan", points: { 4:3, 6:2, 3:2 } },
-    { text: "Liikesarja, jonka jalkani tekevät ennen kuin huomaan", points: { 2:3, 5:2, 3:1 } },
+    { text: "Liikesarja, jota vartaloni haluaa välittömästi kokeilla", points: { 2:3, 5:2, 3:1 } },
     { text: "Konsepti, jonka pitäisi toimia interaktiivisesti", points: { 9:3, 10:2, 6:1 } }
   ]},
-  { text: "Olet katsomassa esitystä tai näyttelyä, joka koskettaa. Mistä se yleensä johtuu?", options: [
-    { text: "Hiljaisuudesta ja siitä, mitä on jätetty pois", points: { 0:3, 7:2, 8:2, 6:1 } },
+  { text: "Olet katsomassa esitystä tai näyttelyä, joka koskettaa syvästi. Mistä se yleensä johtuu?", options: [
+    { text: "Tilasta ja siitä, mitä ei ole sanottu tai on mielikuvituksen varaan", points: { 0:3, 7:2, 8:2, 6:1 } },
     { text: "Tarinasta, joka jää pyörimään päässä", points: { 4:3, 6:3, 3:2, 9:1 } },
     { text: "Kehojen liikkeestä, joka muuttaa ilmaa ympärillään", points: { 2:3, 5:2, 3:2 } },
-    { text: "Siitä että minua pyydettiin osallistumaan, ei vain katsomaan", points: { 10:3, 9:2, 3:1 } }
+    { text: "Siitä että sain osallistua, en vain katsoa tai kuunnella", points: { 10:3, 9:2, 3:1 } }
   ]},
-  { text: "Kuvittele että työpäivänä joku tarkkailisi sinua. Mitä hän näkisi?", options: [
-    { text: "Yksinäistä keskittymistä, kuulokkeet päässä, tuntien hiljaisuutta", points: { 4:3, 0:2, 8:2, 7:2, 6:1, 9:1 } },
-    { text: "Jatkuvaa työryhmäpalaveria ja koordinointia", points: { 6:3, 3:3, 10:2, 5:1, 9:2 } },
+  { text: "Kuvittele, että ihannetyöpäivänäsi joku tarkkailisi sinua. Mitä hän näkisi?", options: [
+    { text: "Rauhallista keskittymistä omaan tekemiseen, ehkä kuulokkeet päässä", points: { 4:3, 0:2, 8:2, 7:2, 6:1, 9:1 } },
+    { text: "Dynaamista palaverointia ja koordinointia", points: { 6:3, 3:3, 10:2, 5:1, 9:2 } },
     { text: "Toistuvaa harjoittelua: sama liike, sama nuotti, sama lause", points: { 1:3, 2:3, 5:3, 3:2 } },
-    { text: "Spontaania kokeilua ilman selvää suuntaa", points: { 10:3, 9:1, 0:1, 2:1 } }
+    { text: "Spontaania kokeilua ja testailua ilman selvää ajatusta mihin se johtaa", points: { 10:3, 9:1, 0:1, 2:1 } }
   ]},
   { text: "Mikä yhdistää lapsuutesi rakkaita muistoja?", options: [
     { text: "Tunnit kahdestaan kirjojen, sarjakuvien tai päiväkirjan kanssa", points: { 4:3, 0:2 } },
     { text: "Pihaleikit, joissa keksittiin sääntöjä lennossa", points: { 10:3, 3:2, 9:2, 5:1 } },
-    { text: "Käsillä tekeminen, askarteleminen, rakenteleminen", points: { 8:3, 0:2 } },
-    { text: "Musiikkitunnit, soittimet, laulaminen yhdessä", points: { 1:3, 2:1 } }
+    { text: "Käsillä tekeminen, askarteleminen, rakenteleminen tai piirtäminen", points: { 8:3, 0:2 } },
+    { text: "Musiikkitunnit, soittimet, laulaminen yhdessä tai yksin", points: { 1:3, 2:1 } }
   ]},
-  { text: "Sinun pitää suunnitella yllätys läheiselle. Miten lähestyt?", options: [
-    { text: "Tiukka suunnitelma, jokainen yksityiskohta etukäteen", points: { 6:3, 4:1, 8:2, 9:2, 0:1, 7:2 } },
-    { text: "Pääidea kyllä, mutta yksityiskohdat hetkessä", points: { 10:3, 2:2, 1:1 } },
-    { text: "Suunnittelet sen yhdessä jonkun toisen kanssa", points: { 3:2, 6:2, 5:2, 10:2 } },
-    { text: "Teet jotain, jossa läheisen reaktio on osa lopputulosta", points: { 10:3, 9:3, 3:1 } }
+  { text: "Sinun pitää suunnitella tärkeä yllätys läheiselle. Miten lähestyt tehtävää?", options: [
+    { text: "Tiukka suunnitelma, jokainen yksityiskohta etukäteen mietitty", points: { 6:3, 4:1, 8:2, 9:2, 0:1, 7:2 } },
+    { text: "Pääidea ja suunta suunnitellaan, mutta yksityiskohdat tulevat sitten miten tulevat", points: { 10:3, 2:2, 1:1 } },
+    { text: "Suunnittelet sen mieluummin yhdessä jonkun toisen tai hyvän porukan kanssa", points: { 3:2, 6:2, 5:2, 10:2 } },
+    { text: "Teet jotain, jossa tärkeintä on läheisen reaktio ja fiilis yllätyksen saadessaan", points: { 10:3, 9:3, 3:1 } }
   ]},
-  { text: "Mikä ympäristö on sinulle luovimmillaan?", options: [
-    { text: "Hiljainen huone, jossa pöydällä on yksi asia", points: { 4:2, 0:3, 8:3, 7:2 } },
+  { text: "Mikä ympäristö on sinulle seuraavista luontevin?", options: [
+    { text: "Minimalistinen työhuone, jossa kaikki on järjestyksessä", points: { 4:2, 0:3, 8:3, 7:2 } },
     { text: "Kahvila, jossa on muiden ihmisten ääniä ympärillä", points: { 4:2, 7:2, 6:2 } },
     { text: "Studio tai treenisali, jossa voit liikkua vapaasti", points: { 2:3, 5:3, 3:2, 1:2 } },
     { text: "Kollektiivinen tila, jossa kaikki tekevät omaansa ja vaihtavat ideoita", points: { 9:3, 10:3, 0:1, 8:1 } }
   ]},
   { text: "Mistä saat eniten energiaa luovassa työssä?", options: [
-    { text: "Siitä että sain juuri sen mitä päässäni näin", points: { 0:3, 8:3, 4:2, 7:2, 6:1 } },
-    { text: "Yllätyksestä — siitä mitä ei voinut etukäteen tietää", points: { 10:3, 1:2, 2:2, 5:1 } },
-    { text: "Reaktiosta, jonka huomaa toisten kasvoilta", points: { 3:3, 5:3, 10:2, 1:2, 2:1 } },
-    { text: "Siitä että jälki säilyy ja löytää uudet katsojansa", points: { 7:3, 4:2, 6:3, 0:2, 8:2, 9:2 } }
+    { text: "Siitä, että saan ilmaistua juuri sen mitä sisälläni tunsin", points: { 0:3, 8:3, 4:2, 7:2, 6:1 } },
+    { text: "Yllätyksestä ja kaikesta siitä mitä ei voinut etukäteen tietää", points: { 10:3, 1:2, 2:2, 5:1 } },
+    { text: "Reaktiosta, jonka huomaa muiden kasvoilta tai ilmeistä", points: { 3:3, 5:3, 10:2, 1:2, 2:1 } },
+    { text: "Siitä, että työni jälki säilyy pitkään ja löytää uudet kokijansa", points: { 7:3, 4:2, 6:3, 0:2, 8:2, 9:2 } }
   ]}
 ];
 
 // 4 type questions — points keyed by type index (0-3)
 const TYPE_QUESTIONS = [
   { text: "Olet löytänyt itsellesi sopivan taiteen tekemisen tavan. Mikä motivoi sinua jatkamaan vuosia eteenpäin?", options: [
-    { text: "Halu päästä yhä syvemmälle yhteen asiaan", points: { 0:3 } },
-    { text: "Jokainen projekti opettaa jotain uutta — seuraava on aina hieman erilainen", points: { 1:3 } },
+    { text: "Halu pureutua yhä syvemmälle yhteen asiaan", points: { 0:3 } },
+    { text: "Jokainen projekti opettaa jotain uutta; seuraava on aina hieman erilainen", points: { 1:3 } },
     { text: "Yhteiset hetket muiden kanssa, joita tekeminen mahdollistaa", points: { 2:3 } },
-    { text: "Useat rinnakkaiset projektit ja kokeilut", points: { 3:3 } }
+    { text: "Useat rinnakkaiset projektit, hulluttelut ja kokeilut", points: { 3:3 } }
   ]},
   { text: "Joku sanoo: 'Hio yhtä taitoa kymmenen tuhatta tuntia.' Mitä ajattelet?", options: [
-    { text: "Kuulostaa juuri minun jutultani", points: { 0:3 } },
-    { text: "Voin tehdä sen, kunhan saan välillä pieniä sivuretkiä", points: { 1:3, 0:1 } },
-    { text: "Hyytävää. Mieluummin nautin tekemisestä ja jaan sen muiden kanssa", points: { 2:3 } },
-    { text: "En kyllä — keksisin sillä välin kymmenen muuta kiinnostavaa asiaa", points: { 3:3 } }
+    { text: "Jes, kuulostaa juuri minun jutultani", points: { 0:3 } },
+    { text: "Voin tehdä sen, kunhan saan välillä pieniä sivuprojekteja", points: { 1:3, 0:1 } },
+    { text: "Hyytävää. Jaksan jonkin verran, mutta nautin enemmän siitä, että saan jakaa sen muiden kanssa", points: { 2:3 } },
+    { text: "En kyllä. Keksisin sillä välin kymmenen muuta kiinnostavaa asiaa", points: { 3:3 } }
   ]},
   { text: "Työstät jotain, mitä et osaa vielä hyvin. Mikä pitää sinut menossa?", options: [
     { text: "Pieni mutta tasainen edistyminen, jonka näkee taaksepäin katsoen", points: { 0:3, 1:1 } },
-    { text: "Hetket, joissa onnistuu yhtäkkiä jokin, vaikka virheitä on enemmän", points: { 3:3, 2:1 } },
-    { text: "Ympärillä olevat ihmiset, jotka tekevät samaa", points: { 2:3 } },
+    { text: "Hetket, joissa onnistuu yhtäkkiä jokin, vaikka virheitä onkin tullut matkalla enemmän", points: { 3:3, 2:1 } },
+    { text: "Ympärillä olevat ihmiset, jotka tekevät samaa. Heistä saa voimaa", points: { 2:3 } },
     { text: "Sen huomaaminen, että työ paranee, vaikken yritäkään olla täydellinen", points: { 1:3 } }
   ]},
-  { text: "Saat vuoden sapattivapaata. Miten käytät sen?", options: [
+  { text: "Saat vuoden työskentelyapurahan. Miten käytät sen?", options: [
     { text: "Käytän koko vuoden yhden asian todelliseen syventämiseen", points: { 0:3 } },
-    { text: "Yksi pääprojekti ja muutama sivutie, joista en vielä tiedä", points: { 1:3 } },
+    { text: "Yksi pääprojekti ja muutama sivujuttu, joista en vielä tiedä", points: { 1:3 } },
     { text: "Matkustelen, tapaan ihmisiä, teen sitä mikä juuri sillä hetkellä tuntuu oikealta", points: { 2:3 } },
     { text: "Listaan kaikki asiat, joita haluan kokeilla, ja menen läpi niin monta kuin ehdin", points: { 3:3 } }
   ]}
