@@ -1,21 +1,177 @@
 <!DOCTYPE html>
 <html lang="fi">
 <head>
-  <meta charset="UTF-8">
-  <title>Minun ensimmäinen GitHub Pages -sivu</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Taiteen tuotanto · Opintojakson digitaaliset resurssit</title>
+<style>
+  :root {
+    --primary: #2E5C8A;
+    --primary-dark: #1F3F5F;
+    --primary-light: #E8EEF7;
+    --accent: #C97C5D;
+    --bg: #FBFAF7;
+    --text: #1B1B1B;
+    --text-muted: #555;
+    --border: #D8D8D8;
+    --shadow: 0 2px 8px rgba(0,0,0,0.08);
+    --shadow-hover: 0 6px 16px rgba(0,0,0,0.12);
+    --radius: 8px;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    line-height: 1.6;
+    color: var(--text);
+    background: var(--bg);
+    margin: 0;
+    padding: 0;
+  }
+  .container { max-width: 880px; margin: 0 auto; padding: 48px 24px 64px; }
 
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 40px auto;
-      padding: 20px;
-      line-height: 1.6;
-    }
+  header { margin-bottom: 40px; }
+  header .eyebrow { font-size: 0.85rem; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin: 0 0 4px; font-weight: 600; }
+  header h1 { font-size: 2.2rem; margin: 0 0 8px; color: var(--primary-dark); line-height: 1.2; }
+  header .subtitle { color: var(--text-muted); font-size: 1.05rem; margin: 0; }
 
-    h1 {
-      color: #2563eb;
-    }
-  </style>
+  .intro { background: var(--primary-light); border-left: 4px solid var(--primary); padding: 18px 22px; border-radius: var(--radius); margin-bottom: 40px; }
+  .intro p { margin: 0; }
+
+  .section-title { font-size: 1.3rem; color: var(--primary-dark); margin: 0 0 16px; font-weight: 600; }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px 26px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+  .card:hover, .card:focus {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+    border-color: var(--primary);
+    outline: none;
+  }
+  .card:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; }
+
+  .card-tag {
+    font-size: 0.75rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin: 0 0 8px;
+    font-weight: 600;
+  }
+  .card-title {
+    font-size: 1.25rem;
+    color: var(--primary-dark);
+    margin: 0 0 12px;
+    font-weight: 700;
+  }
+  .card-description {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin: 0 0 16px;
+    flex: 1;
+  }
+  .card-cta {
+    color: var(--primary);
+    font-weight: 600;
+    font-size: 0.95rem;
+    align-self: flex-start;
+  }
+
+  .card.disabled {
+    background: transparent;
+    border-style: dashed;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .card.disabled:hover { transform: none; box-shadow: none; border-color: var(--border); }
+  .card.disabled .card-title,
+  .card.disabled .card-description { color: var(--text-muted); }
+  .card.disabled .card-cta { color: var(--text-muted); }
+
+  footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+  }
+  footer p { margin: 0; }
+
+  @media (max-width: 600px) {
+    .container { padding: 32px 18px 48px; }
+    header h1 { font-size: 1.6rem; }
+    .cards { grid-template-columns: 1fr; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition: none !important; animation: none !important; }
+  }
+</style>
 </head>
-Milo haisee pierulle<body>
+<body>
+<div class="container">
+
+  <header>
+    <p class="eyebrow">Opintojakso · 5 op · EQF 6</p>
+    <h1>Taiteen tuotanto</h1>
+    <p class="subtitle">Opintojakson digitaaliset tehtävät ja resurssit</p>
+  </header>
+
+  <div class="intro">
+    <p>Tervetuloa Taiteen tuotanto -opintojakson verkkosivuille. Täältä löydät opintojakson tehtävät ja oheisaineiston. Aloita orientaatiokyselystä tai siirry suoraan haluamaasi tehtävään.</p>
+  </div>
+
+  <h2 class="section-title">Tehtävät ja työkalut</h2>
+
+  <div class="cards">
+
+    <!-- ====== KORTTIPOHJA: kopioi tämä blokki kun lisäät uuden kortin ======
+    <a class="card" href="POLKU_TIEDOSTOON.html">
+      <p class="card-tag">Tehtävä T?</p>
+      <h3 class="card-title">Kortin otsikko</h3>
+      <p class="card-description">Lyhyt kuvaus siitä, mitä tämä on ja kestoarvio.</p>
+      <span class="card-cta">Aloita →</span>
+    </a>
+    ====================================================================== -->
+
+    <a class="card" href="orientaatiokysely.html">
+      <p class="card-tag">Tehtävä T1</p>
+      <h3 class="card-title">Orientaatiokysely</h3>
+      <p class="card-description">Mikä taiteenala on sinulle lähimpänä, ja millainen tekijätyyppi olet? Leikkimielinen 16 kysymyksen kysely, jonka tuloksen avulla pohdit omaa suuntautumistasi tuottajana. Kesto noin 5–8 min.</p>
+      <span class="card-cta">Aloita kysely →</span>
+    </a>
+
+    <!-- Esimerkki "tulossa myöhemmin" -kortista — voit poistaa kun lisäät oikean -->
+    <div class="card disabled" aria-disabled="true">
+      <p class="card-tag">Tulossa</p>
+      <h3 class="card-title">Projektisuunnitelma (T2)</h3>
+      <p class="card-description">Tehtäväkortti ja työpohja projektin suunnittelulle. Julkaistaan myöhemmin.</p>
+      <span class="card-cta">Pian saatavilla</span>
+    </div>
+
+  </div>
+
+  <footer>
+    <p>Humak · Taiteen tuotanto · Opintojakson verkkoresurssit</p>
+  </footer>
+
+</div>
+</body>
+</html>
