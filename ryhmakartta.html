@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Johtamistyylin ryhmäkartta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: input column (paste codes + own code) beside the grid; summary under the grid */
+:root {
+  --bg: #FFFFFF; --surface: #F5F2ED; --fg: #17140F; --muted: #5E574C; --line: #E2DCD2;
+  --accent: #FFB552; --accent-ink: #8A5200; --ink-on-accent: #17140F; --own: #2F6F62; --m: #6B4FA0;
+  --font-display: "Bricolage Grotesque", "Arial Black", Arial, sans-serif;
+  --font-body: "Atkinson Hyperlegible", Arial, Helvetica, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root { --bg: #15130F; --surface: #221F1A; --fg: #F3EEE6; --muted: #B5AC9E; --line: #3A352D;
+    --accent: #FFB552; --accent-ink: #FFC57A; --ink-on-accent: #17140F; --own: #6CC3B0; --m: #B49BE6; color-scheme: dark; }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 16px; line-height: 1.5; }
+.wrap { max-width: 1080px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-right, 0px)) 56px max(16px, env(safe-area-inset-left, 0px)); display: grid; gap: 28px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.9rem, 5vw, 2.8rem); line-height: 1.05; margin: 0; letter-spacing: -0.02em; text-wrap: balance; }
+h2 { font-size: 1rem; margin: 0; }
+p { margin: 0; }
+.eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); }
+.note { font-size: 0.9rem; color: var(--muted); max-width: 64ch; }
+.main { display: grid; grid-template-columns: minmax(0, 340px) minmax(0, 1fr); gap: 32px; align-items: start; }
+@media (max-width: 760px) { .main { grid-template-columns: 1fr; } }
+.panel { display: grid; gap: 14px; min-width: 0; }
+textarea, input[type=text] { width: 100%; font: inherit; color: var(--fg); background: var(--surface); border: 1.5px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+textarea { min-height: 220px; resize: vertical; font-variant-numeric: tabular-nums; }
+textarea:focus, input:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button { font: inherit; font-weight: 700; border-radius: 8px; padding: 9px 14px; cursor: pointer; border: 1.5px solid var(--fg); background: var(--fg); color: var(--bg); }
+button.ghost { background: transparent; color: var(--fg); }
+button:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 2px; }
+.status { font-size: 0.9rem; font-weight: 700; }
+.status.warn { color: var(--accent-ink); }
+.gridwrap { background: var(--surface); border-radius: 16px; padding: 18px; display: grid; gap: 14px; min-width: 0; }
+svg { display: block; width: 100%; height: auto; max-width: 620px; margin: 0 auto; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(105px, 1fr)); gap: 10px; }
+.stat { background: var(--bg); border-radius: 10px; padding: 10px 12px; }
+.stat b { display: block; font-family: var(--font-display); font-size: 1.6rem; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 0.85rem; color: var(--muted); }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 0.85rem; color: var(--muted); align-items: center; }
+.sw { display: inline-block; width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-right: 6px; }
+.example { display: inline-block; font-size: 0.75rem; font-weight: 700; background: var(--accent); color: var(--ink-on-accent); border-radius: 999px; padding: 2px 10px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">Johtamistyylin peili · Talous ja johtaminen</span>
+    <h1>Johtamistyylin ryhmäkartta</h1>
+    <p class="note">Liitä chatista kopioidut tuloskoodit (esim. T7 I5 M8). Sivu poimii koodit muun tekstin seasta ja sijoittaa ne Blaken ja Moutonin ruudukkoon. Mitään ei tallenneta eikä lähetetä minnekään.</p>
+  </header>
+
+  <div class="main">
+    <section class="panel" aria-labelledby="h-in">
+      <h2 id="h-in">1. Liitä tuloskoodit</h2>
+      <textarea id="codes" aria-describedby="status" spellcheck="false"></textarea>
+      <div class="row">
+        <button type="button" id="clear" class="ghost">Tyhjennä</button>
+        <span id="status" class="status" aria-live="polite"></span>
+      </div>
+      <h2 id="h-own" style="margin-top:8px">2. Näytä oma sijaintisi (valinnainen)</h2>
+      <input type="text" id="own" placeholder="esim. T7 I5 M8" aria-labelledby="h-own" autocomplete="off">
+      <p class="note">Oma piste näkyy ruudukossa vihreänä renkaana muiden joukossa.</p>
+    </section>
+
+    <section class="gridwrap" aria-labelledby="h-grid">
+      <div class="row" style="justify-content:space-between">
+        <h2 id="h-grid">Ryhmän sijainnit ruudukossa</h2>
+        <span id="exampleTag" class="example">Esimerkkidata</span>
+      </div>
+      <div id="grid"></div>
+      <div class="legend">
+        <span><span class="sw" style="background:var(--accent)"></span>Pallon koko = vastaajien määrä ruudussa</span>
+        <span><span class="sw" style="background:transparent;border:3px solid var(--own)"></span>Oma sijainti</span>
+        <span><span class="sw" style="background:var(--m)"></span>Ryhmän keskiarvo</span>
+      </div>
+      <div class="stats" id="stats"></div>
+    </section>
+  </div>
+  <p class="note">Peili on pohdinnan väline, ei validoitu testi. Ruudukko: Blake &amp; Mouton 1964; muutosulottuvuus: Ekvall &amp; Arvonen 1991.</p>
+</div>
+
+<script>
+const EXAMPLE = `Esimerkki – korvaa omilla koodeillanne:
+Aino: T7 I5 M8
+Ville: T5 I8 M6
+T3 I7 M7
+T8 I4 M5
+T6 I6 M6
+T6 I7 M4
+T5 I8 M8
+T4 I6 M9
+T7 I7 M6
+T5 I5 M5`;
+const ta = document.getElementById('codes'), own = document.getElementById('own');
+ta.value = EXAMPLE;
+let isExample = true;
+
+const RX = /T\s*([1-9])\s*[,;]?\s*I\s*([1-9])\s*[,;]?\s*M\s*([1-9])/gi;
+function parse(text) {
+  const out = []; let m; RX.lastIndex = 0;
+  while ((m = RX.exec(text))) out.push({ t: +m[1], i: +m[2], m: +m[3] });
+  return out;
+}
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+function render() {
+  const pts = parse(ta.value);
+  const ownPt = parse(own.value)[0] || null;
+  document.getElementById('exampleTag').hidden = !isExample;
+  const st = document.getElementById('status');
+  st.className = 'status';
+  if (!ta.value.trim()) st.textContent = '';
+  else if (!pts.length) { st.textContent = 'Koodeja ei löytynyt. Muoto: T7 I5 M8.'; st.className = 'status warn'; }
+  else st.textContent = `${pts.length} ${pts.length === 1 ? 'koodi' : 'koodia'} löytyi`;
+
+  const S = 560, pad = 54, top = 14, g = S - pad - 20, cell = g / 9;
+  const cx = t => pad + (t - 0.5) * cell, cy = i => top + g - (i - 0.5) * cell;
+  const counts = {}; let maxC = 1;
+  pts.forEach(p => { const k = p.t + ',' + p.i; counts[k] = (counts[k] || 0) + 1; maxC = Math.max(maxC, counts[k]); });
+  let s = `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="Ruudukko, ${pts.length} vastaajaa">`;
+  s += `<rect x="${pad}" y="${top}" width="${g}" height="${g}" fill="${css('--bg')}" stroke="${css('--line')}"/>`;
+  for (let k = 1; k < 9; k++) {
+    s += `<line x1="${pad + k * cell}" y1="${top}" x2="${pad + k * cell}" y2="${top + g}" stroke="${css('--line')}" stroke-width="0.7"/>`;
+    s += `<line x1="${pad}" y1="${top + k * cell}" x2="${pad + g}" y2="${top + k * cell}" stroke="${css('--line')}" stroke-width="0.7"/>`;
+  }
+  const lab = [['Kerho (1,9)', 1, 9, 'start'], ['Tiimi (9,9)', 9, 9, 'end'], ['Välinpitämätön (1,1)', 1, 1, 'start'], ['Tehtävä (9,1)', 9, 1, 'end']];
+  lab.forEach(([l, t, i, a]) => {
+    const x = a === 'start' ? pad + 6 : pad + g - 6, y = i === 9 ? top + 16 : top + g - 7;
+    s += `<text x="${x}" y="${y}" text-anchor="${a}" font-size="11" fill="${css('--muted')}" font-family="Atkinson Hyperlegible, Arial, sans-serif">${l}</text>`;
+  });
+  for (let v = 1; v <= 9; v++) {
+    s += `<text x="${cx(v)}" y="${top + g + 18}" text-anchor="middle" font-size="12" fill="${css('--muted')}">${v}</text>`;
+    s += `<text x="${pad - 10}" y="${cy(v) + 4}" text-anchor="end" font-size="12" fill="${css('--muted')}">${v}</text>`;
+  }
+  s += `<text x="${pad + g / 2}" y="${S - 4}" text-anchor="middle" font-size="13" font-weight="700" fill="${css('--fg')}">Tehtävä →</text>`;
+  s += `<text transform="translate(16 ${top + g / 2}) rotate(-90)" text-anchor="middle" font-size="13" font-weight="700" fill="${css('--fg')}">Ihmiset →</text>`;
+  Object.entries(counts).forEach(([k, c]) => {
+    const [t, i] = k.split(',').map(Number);
+    const r = Math.min(cell * 0.48, 9 + (c / maxC) * (cell * 0.48 - 9));
+    s += `<circle cx="${cx(t)}" cy="${cy(i)}" r="${r}" fill="${css('--accent')}" stroke="${css('--bg')}" stroke-width="1.5"/>`;
+    if (c > 1) s += `<text x="${cx(t)}" y="${cy(i) + 4}" text-anchor="middle" font-size="12" font-weight="700" fill="${css('--ink-on-accent')}">${c}</text>`;
+  });
+  if (pts.length) {
+    const at = pts.reduce((a, p) => a + p.t, 0) / pts.length, ai = pts.reduce((a, p) => a + p.i, 0) / pts.length;
+    const x = pad + (at - 0.5) * cell, y = top + g - (ai - 0.5) * cell;
+    s += `<path d="M${x - 9} ${y} L${x} ${y - 9} L${x + 9} ${y} L${x} ${y + 9} Z" fill="${css('--m')}" stroke="${css('--bg')}" stroke-width="1.5"/>`;
+  }
+  if (ownPt) s += `<circle cx="${cx(ownPt.t)}" cy="${cy(ownPt.i)}" r="${cell * 0.46}" fill="none" stroke="${css('--own')}" stroke-width="4"/>`;
+  s += '</svg>';
+  document.getElementById('grid').innerHTML = s;
+
+  const avg = k => pts.length ? (pts.reduce((a, p) => a + p[k], 0) / pts.length).toFixed(1).replace('.', ',') : '–';
+  const hiI = pts.filter(p => p.i > p.t).length, hiT = pts.filter(p => p.t > p.i).length;
+  document.getElementById('stats').innerHTML =
+    `<div class="stat"><b>${pts.length}</b><span>vastaajaa</span></div>` +
+    `<div class="stat"><b>${avg('t')}</b><span>tehtävä, keskiarvo</span></div>` +
+    `<div class="stat"><b>${avg('i')}</b><span>ihmiset, keskiarvo</span></div>` +
+    `<div class="stat"><b>${avg('m')}</b><span>muutos, keskiarvo</span></div>` +
+    `<div class="stat"><b>${hiI} / ${hiT}</b><span>ihmiset > tehtävä / tehtävä > ihmiset</span></div>`;
+}
+ta.addEventListener('input', () => { isExample = false; render(); });
+own.addEventListener('input', render);
+document.getElementById('clear').addEventListener('click', () => { ta.value = ''; isExample = false; render(); ta.focus(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', render);
+render();
+</script>
+</body>
+</html>
