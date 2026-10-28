@@ -1,0 +1,302 @@
+<!doctype html>
+<html lang="fi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+</head>
+<body style="margin:0">
+<title>Johtamistyylin peili</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:wght@400;700&display=swap">
+<style>
+/* Layout: one reading column — statements as a numbered questionnaire, results as a grid "mirror" below */
+:root {
+  --bg: #FFFFFF;
+  --surface: #F5F2ED;
+  --fg: #17140F;
+  --muted: #5E574C;
+  --line: #E2DCD2;
+  --accent: #FFB552;
+  --accent-ink: #8A5200;
+  --ink-on-accent: #17140F;
+  --t: #C96F00;
+  --i: #2F6F62;
+  --m: #6B4FA0;
+  --font-display: "Bricolage Grotesque", "Arial Black", Arial, sans-serif;
+  --font-body: "Atkinson Hyperlegible", Arial, Helvetica, sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15130F; --surface: #221F1A; --fg: #F3EEE6; --muted: #B5AC9E; --line: #3A352D;
+    --accent: #FFB552; --accent-ink: #FFC57A; --ink-on-accent: #17140F;
+    --t: #FFA733; --i: #6CC3B0; --m: #B49BE6; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #15130F; --surface: #221F1A; --fg: #F3EEE6; --muted: #B5AC9E; --line: #3A352D;
+  --accent: #FFB552; --accent-ink: #FFC57A; --ink-on-accent: #17140F;
+  --t: #FFA733; --i: #6CC3B0; --m: #B49BE6; color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font-body); font-size: 17px; line-height: 1.55; }
+.wrap { max-width: 760px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 64px; display: grid; gap: 40px; }
+h1, h2 { font-family: var(--font-display); text-wrap: balance; margin: 0; line-height: 1.08; }
+h1 { font-size: clamp(2.1rem, 6vw, 3.3rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: 1.6rem; font-weight: 800; }
+p { margin: 0; }
+.eyebrow { font-size: 0.78rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-ink); }
+header { display: grid; gap: 14px; }
+.lede { font-size: 1.12rem; max-width: 62ch; }
+.note { font-size: 0.92rem; color: var(--muted); max-width: 62ch; }
+.dims { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip { display: inline-flex; align-items: center; gap: 8px; font-size: 0.9rem; font-weight: 700; padding: 5px 12px; border-radius: 999px; background: var(--surface); }
+.dot { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+
+.progress { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); padding-block: 10px; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--bg); }
+.bar { flex: 1; height: 8px; border-radius: 4px; background: var(--surface); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+.count { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 0.95rem; min-width: 4.5em; text-align: right; }
+
+.scale-key { display: flex; justify-content: space-between; gap: 12px; font-size: 0.85rem; color: var(--muted); }
+ol.qs { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.q { display: grid; grid-template-columns: 2.2em 1fr; gap: 4px 12px; padding-block: 16px; border-bottom: 1px solid var(--line); }
+.q .n { font-family: var(--font-display); font-weight: 800; color: var(--muted); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.q .txt { min-width: 0; }
+.opts { grid-column: 2; display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 8px; max-width: 360px; }
+.opts input { position: absolute; opacity: 0; pointer-events: none; }
+.opts label { display: grid; place-items: center; height: 42px; border-radius: 8px; border: 1.5px solid var(--line); font-weight: 700; cursor: pointer; font-variant-numeric: tabular-nums; transition: background .15s, border-color .15s; }
+.opts label:hover { border-color: var(--accent-ink); }
+.opts input:checked + label { background: var(--accent); border-color: var(--accent); color: var(--ink-on-accent); }
+.opts input:focus-visible + label { outline: 3px solid var(--accent-ink); outline-offset: 2px; }
+
+.result { display: grid; gap: 22px; background: var(--surface); border-radius: 16px; padding-block: 28px; padding-left: clamp(18px, 4vw, 32px); padding-right: clamp(18px, 4vw, 32px); }
+.result-top { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 28px; align-items: start; }
+@media (max-width: 640px) { .result-top { grid-template-columns: 1fr; } }
+.gridbox { max-width: 100%; }
+svg { display: block; width: 100%; height: auto; }
+.scores { display: grid; gap: 14px; min-width: 0; }
+.score { display: grid; gap: 6px; }
+.score .row { display: flex; justify-content: space-between; gap: 8px; font-weight: 700; }
+.score .val { font-variant-numeric: tabular-nums; }
+.track { height: 12px; border-radius: 6px; background: var(--bg); overflow: hidden; }
+.track > span { display: block; height: 100%; width: 0; transition: width .4s; }
+.style-name { font-family: var(--font-display); font-size: 1.45rem; font-weight: 800; }
+.code { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.code output { font-family: var(--font-display); font-weight: 800; font-size: 1.25rem; background: var(--bg); padding: 6px 14px; border-radius: 8px; letter-spacing: 0.04em; user-select: all; }
+button { font: inherit; font-weight: 700; border-radius: 8px; padding: 10px 16px; cursor: pointer; border: 1.5px solid var(--fg); background: var(--fg); color: var(--bg); }
+button.ghost { background: transparent; color: var(--fg); }
+button:focus-visible { outline: 3px solid var(--accent-ink); outline-offset: 2px; }
+.reflect { display: grid; gap: 10px; }
+.reflect ul { margin: 0; padding-left: 1.2em; display: grid; gap: 6px; }
+.interp { display: grid; gap: 10px; }
+.interp p { max-width: 64ch; }
+.placeholder { color: var(--muted); font-style: italic; }
+.foot { font-size: 0.85rem; color: var(--muted); display: grid; gap: 6px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Talous ja johtaminen · Humak</span>
+    <h1>Johtamistyylin peili</h1>
+    <p class="lede">18 väittämää siitä, miten toimit vetäessäsi ryhmää. Ajattele todellista tilannetta: ryhmätyötä, projektia, tapahtumaa, harrastusryhmää tai työvuoroa, jossa vastasit muista.</p>
+    <div class="dims">
+      <span class="chip"><span class="dot" style="background:var(--t)"></span>Tehtävä</span>
+      <span class="chip"><span class="dot" style="background:var(--i)"></span>Ihmiset</span>
+      <span class="chip"><span class="dot" style="background:var(--m)"></span>Muutos</span>
+    </div>
+    <p class="note">Tämä on pohdinnan väline, ei validoitu persoonallisuustesti. Se nojaa käyttäytymisteorioiden ulottuvuuksiin (Ohio State, Blake &amp; Mouton) ja Ekvallin &amp; Arvosen kolmanteen, muutosta painottavaan ulottuvuuteen. Vastauksia ei tallenneta eikä lähetetä minnekään.</p>
+  </header>
+
+  <section aria-labelledby="qh" style="display:grid;gap:14px">
+    <div class="progress" aria-live="polite">
+      <div class="bar"><span id="pbar"></span></div>
+      <span class="count" id="pcount">0 / 18</span>
+    </div>
+    <h2 id="qh">Kuinka usein toimit näin?</h2>
+    <div class="scale-key"><span>1 = en juuri koskaan</span><span>5 = lähes aina</span></div>
+    <ol class="qs" id="qs"></ol>
+  </section>
+
+  <section class="result" id="result" aria-labelledby="rh">
+    <span class="eyebrow">Tuloksesi</span>
+    <h2 id="rh">Missä kohtaa ruudukkoa toimit?</h2>
+    <div class="result-top">
+      <div class="gridbox" id="gridbox"></div>
+      <div class="scores">
+        <div class="score"><div class="row"><span>Tehtävä</span><span class="val" id="vt">–</span></div><div class="track"><span id="bt" style="background:var(--t)"></span></div></div>
+        <div class="score"><div class="row"><span>Ihmiset</span><span class="val" id="vi">–</span></div><div class="track"><span id="bi" style="background:var(--i)"></span></div></div>
+        <div class="score"><div class="row"><span>Muutos</span><span class="val" id="vm">–</span></div><div class="track"><span id="bm" style="background:var(--m)"></span></div></div>
+        <p class="note">Asteikko 1–9 kuten Blaken ja Moutonin ruudukossa.</p>
+      </div>
+    </div>
+    <div class="interp" id="interp">
+      <p class="placeholder">Tulos näkyy, kun olet vastannut kaikkiin 18 väittämään. Ruudukossa on nyt esimerkkipiste.</p>
+    </div>
+    <div class="code" id="codebox" hidden>
+      <span>Tuloskoodisi chattiin:</span>
+      <output id="code"></output>
+      <button type="button" id="copy">Kopioi</button>
+      <span id="copied" class="note" aria-live="polite"></span>
+    </div>
+    <div class="reflect">
+      <strong>Pohdi parin tai trion kanssa</strong>
+      <ul>
+        <li>Missä tilanteessa tämä tyyli on toiminut sinulla hyvin? Missä se on kääntynyt itseään vastaan?</li>
+        <li>Mikä ulottuvuus on sinulla matalin? Mistä luulet sen johtuvan?</li>
+        <li>Miten tyylisi toimisi etätiimissä, keikkatyössä tai monikulttuurisessa projektissa?</li>
+        <li>Mitä yhtä tekoa voisit harjoitella seuraavassa ryhmätyössä?</li>
+      </ul>
+    </div>
+    <button type="button" class="ghost" id="reset" style="justify-self:start">Tyhjennä vastaukset</button>
+  </section>
+
+  <div class="foot">
+    <span>Taustaa: Blake, R. &amp; Mouton, J. 1964. The Managerial Grid · Ekvall, G. &amp; Arvonen, J. 1991. Change-centered leadership: an extension of the two-dimensional model. Scandinavian Journal of Management.</span>
+    <span>Väittämät on laadittu opetuskäyttöön Talous ja johtaminen -opintojaksolle, eivätkä ne ole alkuperäisten mittareiden kysymyksiä.</span>
+  </div>
+</div>
+
+<script>
+const Q = [
+  ['t','Teen selväksi, kuka tekee mitäkin ja mihin mennessä.'],
+  ['i','Kysyn ryhmäläisiltä, miten heillä menee, myös muusta kuin itse työstä.'],
+  ['m','Ehdotan uusia tapoja tehdä asioita, vaikka vanhakin toimisi.'],
+  ['t','Laadin aikataulun ja seuraan, että siinä pysytään.'],
+  ['i','Kuuntelen eriävät mielipiteet loppuun ennen kuin päätän.'],
+  ['m','Kerron mielelläni, millaisen tulevaisuuden näen ryhmälle tai projektille.'],
+  ['t','Huomaan nopeasti, jos työn laatu tai tulos ei ole sovitulla tasolla.'],
+  ['i','Kiitän ja annan tunnustusta myös pienistä onnistumisista.'],
+  ['m','Kokeilen uutta, vaikka lopputulos olisi epävarma.'],
+  ['t','Pidän kiinni sovituista toimintatavoista ja pelisäännöistä.'],
+  ['i','Huomaan, jos joku ryhmässä jää ulkopuolelle tai vetäytyy.'],
+  ['m','Seuraan, mitä alalla tapahtuu, ja tuon ideoita ryhmään.'],
+  ['t','Pilkon isot tavoitteet konkreettisiksi tehtäviksi.'],
+  ['i','Otan muiden toiveet ja jaksamisen huomioon työnjaossa.'],
+  ['m','Innostun muutoksista ja saan muutkin mukaan.'],
+  ['t','Otan puheeksi, jos joku ei tee sovittua osuuttaan.'],
+  ['i','Luotan ryhmäläisiin ja annan heidän tehdä asiat omalla tavallaan.'],
+  ['m','Kyseenalaistan totutun tavan, jos se ei palvele tavoitetta.'],
+];
+const ans = new Array(Q.length).fill(null);
+const qs = document.getElementById('qs');
+Q.forEach(([, text], k) => {
+  const li = document.createElement('li');
+  li.className = 'q';
+  const opts = [1,2,3,4,5].map(v => `<input type="radio" name="q${k}" id="q${k}v${v}" value="${v}"><label for="q${k}v${v}" aria-label="${v}">${v}</label>`).join('');
+  li.innerHTML = `<span class="n">${k+1}</span><span class="txt">${text}</span><div class="opts" role="radiogroup" aria-label="Väittämä ${k+1}">${opts}</div>`;
+  qs.appendChild(li);
+});
+qs.addEventListener('change', e => {
+  const m = e.target.name && e.target.name.match(/^q(\d+)$/);
+  if (!m) return;
+  ans[+m[1]] = +e.target.value;
+  update();
+});
+
+const to9 = avg => 1 + (avg - 1) * 2; // 1–5 → 1–9
+function scores() {
+  const sum = { t: 0, i: 0, m: 0 }, n = { t: 0, i: 0, m: 0 };
+  Q.forEach(([d], k) => { if (ans[k] != null) { sum[d] += ans[k]; n[d]++; } });
+  return { t: n.t ? to9(sum.t / n.t) : null, i: n.i ? to9(sum.i / n.i) : null, m: n.m ? to9(sum.m / n.m) : null };
+}
+const band = v => v >= 6.5 ? 'hi' : v <= 3.5 ? 'lo' : 'mid';
+const STYLES = {
+  'hi-hi': ['Tiimijohtaminen (9,9)', 'Pidät huolta sekä tuloksista että ihmisistä. Blake ja Mouton pitivät tätä ihanteena, mutta myöhempi tutkimus kysyy, onko yksi tyyli aina paras. Pohdi, missä tilanteissa kevyempi ote riittäisi tai toimisi paremmin.'],
+  'hi-mid': ['Tulossuuntautunut, ihmisiä huomioiva', 'Tehtävä on sinulle vahva, ja huomioit ihmisiä kohtuullisesti. Paineen alla ihmispuoli voi jäädä jalkoihin – miten pidät sen mukana kiireessä?'],
+  'hi-lo': ['Tehtäväjohtaminen (9,1)', 'Saat asiat valmiiksi ja pidät rakenteet kunnossa. Riskinä on, että ihmiset kokevat olevansa välineitä. Tilannejohtamisen mukaan tämä voi toimia uuden tekijän kanssa tai kriisissä, mutta harvoin pitkään.'],
+  'mid-hi': ['Ihmisiin painottuva, tehtävästä huolehtiva', 'Ilmapiiri ja ihmiset ovat sinulle tärkeitä, ja pidät tehtävästäkin huolta. Kysy itseltäsi, uskallatko tarttua, kun joku ei tee osuuttaan.'],
+  'mid-mid': ['Keskitien johtaminen (5,5)', 'Tasapainoilet tehtävän ja ihmisten välillä. Tämä on usein joustava ja turvallinen ote, mutta voi jäädä kompromissiksi, jossa kumpikaan ei saa täyttä huomiota.'],
+  'mid-lo': ['Rakenteita painottava', 'Tehtävä saa sinulta enemmän huomiota kuin ihmiset. Pohdi, miten näyttäisit arvostusta ja kiinnostusta pienillä teoilla.'],
+  'lo-hi': ['Kerhojohtaminen (1,9)', 'Luot hyvän ilmapiirin ja ihmiset viihtyvät. Riskinä on, että tavoitteet ja aikataulut lipsuvat ja vaikeat asiat jäävät sanomatta. Muista: "vaikeista asioista puhumista riittävän ajoissa kauniisti".'],
+  'lo-mid': ['Ihmisiin luottava, rakenteeton', 'Annat tilaa ja huomioit muita, mutta rakenteet ovat kevyitä. Osaavassa tiimissä tämä voi olla delegointia, uudessa ryhmässä epäselvyyttä.'],
+  'lo-lo': ['Väistyvä johtaminen (1,1)', 'Vastauksesi viittaavat siihen, että et ole ottanut vetäjän roolia vahvasti, tai tilanne ei sitä vaatinut. Pohdi, oliko kyse omasta valinnasta, roolin epäselvyydestä vai siitä, ettei sinulla ole vielä kokemusta vetämisestä.'],
+};
+const MCH = {
+  hi: 'Muutosulottuvuutesi on vahva: tuot ideoita ja visiota. Kulttuurialan projekteissa tästä on hyötyä, kunhan muut pysyvät mukana.',
+  mid: 'Muutosulottuvuutesi on keskitasoa: kehität, kun siihen on syytä.',
+  lo: 'Muutosulottuvuutesi on matala: pidät mieluummin kiinni toimivasta. Ekvallin ja Arvosen mukaan muuttuvassa ympäristössä tämä ulottuvuus nousee tärkeäksi – mistä voisit aloittaa?',
+};
+
+const NS = 'http://www.w3.org/2000/svg';
+function drawGrid(t, i, example) {
+  const S = 300, pad = 34, g = S - pad - 10, cell = g / 9;
+  const css = getComputedStyle(document.documentElement);
+  const c = n => css.getPropertyValue(n).trim();
+  let s = `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="Johtamisruudukko: tehtävä ${t ? t.toFixed(1) : '-'}, ihmiset ${i ? i.toFixed(1) : '-'}">`;
+  s += `<rect x="${pad}" y="10" width="${g}" height="${g}" fill="${c('--bg')}" stroke="${c('--line')}"/>`;
+  for (let k = 1; k < 9; k++) {
+    s += `<line x1="${pad + k*cell}" y1="10" x2="${pad + k*cell}" y2="${10+g}" stroke="${c('--line')}" stroke-width="0.6"/>`;
+    s += `<line x1="${pad}" y1="${10 + k*cell}" x2="${pad+g}" y2="${10 + k*cell}" stroke="${c('--line')}" stroke-width="0.6"/>`;
+  }
+  const P = (a, b) => [pad + (a - 0.5) * cell, 10 + g - (b - 0.5) * cell];
+  [['1,9',1,9],['9,9',9,9],['5,5',5,5],['1,1',1,1],['9,1',9,1]].forEach(([l,a,b]) => {
+    const [x,y] = P(a,b);
+    s += `<text x="${x}" y="${y+4}" text-anchor="middle" font-size="11" font-weight="700" fill="${c('--muted')}" font-family="Atkinson Hyperlegible, Arial, sans-serif">${l}</text>`;
+  });
+  [1,5,9].forEach(v => {
+    const [x] = P(v,1); const [, y] = P(1,v);
+    s += `<text x="${x}" y="${10+g+15}" text-anchor="middle" font-size="10" fill="${c('--muted')}">${v}</text>`;
+    s += `<text x="${pad-8}" y="${y+4}" text-anchor="end" font-size="10" fill="${c('--muted')}">${v}</text>`;
+  });
+  s += `<text x="${pad + g/2}" y="${S-1}" text-anchor="middle" font-size="11" font-weight="700" fill="${c('--fg')}">Tehtävä →</text>`;
+  s += `<text transform="translate(10 ${10+g/2}) rotate(-90)" text-anchor="middle" font-size="11" font-weight="700" fill="${c('--fg')}">Ihmiset →</text>`;
+  if (t != null && i != null) {
+    const x = pad + (t - 1) / 8 * (g - cell) + cell/2, y = 10 + g - ((i - 1) / 8 * (g - cell) + cell/2);
+    s += `<circle cx="${x}" cy="${y}" r="13" fill="${c('--accent')}" fill-opacity="${example ? 0.35 : 1}" stroke="${c('--fg')}" stroke-width="${example ? 1 : 2}" ${example ? 'stroke-dasharray="3 3"' : ''}/>`;
+    if (example) s += `<text x="${x}" y="${y-19}" text-anchor="middle" font-size="10" fill="${c('--muted')}">esimerkki</text>`;
+  }
+  s += '</svg>';
+  document.getElementById('gridbox').innerHTML = s;
+}
+
+function setBar(id, vid, v) {
+  document.getElementById(id).style.width = v == null ? '0' : ((v - 1) / 8 * 100) + '%';
+  document.getElementById(vid).textContent = v == null ? '–' : v.toFixed(1).replace('.', ',');
+}
+function update() {
+  const done = ans.filter(a => a != null).length;
+  document.getElementById('pbar').style.width = (done / Q.length * 100) + '%';
+  document.getElementById('pcount').textContent = `${done} / ${Q.length}`;
+  const s = scores();
+  const complete = done === Q.length;
+  setBar('bt','vt', s.t); setBar('bi','vi', s.i); setBar('bm','vm', s.m);
+  const interp = document.getElementById('interp');
+  if (!complete) {
+    drawGrid(6.2, 7.4, true);
+    interp.innerHTML = `<p class="placeholder">Tulos näkyy, kun olet vastannut kaikkiin 18 väittämään (${Q.length - done} jäljellä). Ruudukossa on nyt esimerkkipiste.</p>`;
+    document.getElementById('codebox').hidden = true;
+    return;
+  }
+  drawGrid(s.t, s.i, false);
+  const [name, text] = STYLES[band(s.t) + '-' + band(s.i)];
+  interp.innerHTML = '';
+  const h = document.createElement('div'); h.className = 'style-name'; h.textContent = name;
+  const p1 = document.createElement('p'); p1.textContent = text;
+  const p2 = document.createElement('p'); p2.textContent = MCH[band(s.m)];
+  interp.append(h, p1, p2);
+  const r = v => Math.round(v);
+  document.getElementById('code').textContent = `T${r(s.t)} I${r(s.i)} M${r(s.m)}`;
+  document.getElementById('codebox').hidden = false;
+}
+document.getElementById('copy').addEventListener('click', () => {
+  const out = document.getElementById('code'), msg = document.getElementById('copied');
+  const fallback = () => { const rg = document.createRange(); rg.selectNodeContents(out); const sel = getSelection(); sel.removeAllRanges(); sel.addRange(rg); msg.textContent = 'Valittu – kopioi pikanäppäimellä.'; };
+  try { navigator.clipboard.writeText(out.textContent).then(() => { msg.textContent = 'Kopioitu.'; }, fallback); } catch (e) { fallback(); }
+});
+document.getElementById('reset').addEventListener('click', () => {
+  ans.fill(null);
+  qs.querySelectorAll('input').forEach(x => { x.checked = false; });
+  update();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', update);
+new MutationObserver(update).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+update();
+</script>
+
+</body>
+</html>
